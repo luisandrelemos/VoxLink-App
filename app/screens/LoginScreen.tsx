@@ -12,11 +12,13 @@ import {
   Platform,
   ScrollView
 } from 'react-native';
+import { Entypo } from '@expo/vector-icons';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [stayConnected, setStayConnected] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -37,14 +39,23 @@ export default function LoginScreen() {
             keyboardType="email-address"
           />
 
-          <TextInput
-            style={styles.input}
-            placeholder="Password"
-            placeholderTextColor="#ccc"
-            secureTextEntry
-            value={password}
-            onChangeText={setPassword}
-          />
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={styles.inputPassword}
+              placeholder="Password"
+              placeholderTextColor="#ccc"
+              secureTextEntry={!showPassword}
+              value={password}
+              onChangeText={setPassword}
+            />
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+              <Entypo
+                name={showPassword ? 'eye-with-line' : 'eye'}
+                size={22}
+                color="#888"
+              />
+            </TouchableOpacity>
+          </View>
 
           <View style={styles.stayConnected}>
             <Text style={styles.stayConnectedText}>Ficar Conectado</Text>
@@ -99,6 +110,7 @@ const styles = StyleSheet.create({
   scrollContainer: {
     padding: 20,
     alignItems: 'center',
+    marginTop: 70,
   },
   logo: {
     width: 100,
@@ -119,6 +131,20 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     padding: 12,
     marginBottom: 15,
+    fontFamily: 'Montserrat-Regular',
+  },
+  passwordContainer: {
+    width: '100%',
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    paddingHorizontal: 12,
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 15,
+  },
+  inputPassword: {
+    flex: 1,
+    paddingVertical: 12,
     fontFamily: 'Montserrat-Regular',
   },
   stayConnected: {
@@ -191,9 +217,9 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat-SemiBold',
   },
   footerText: {
-    marginTop: 40,
+    marginTop: 20,
     color: '#fff',
-    fontSize: 18,
+    fontSize: 24,
     fontFamily: 'Montserrat-SemiBold',
   },
 });

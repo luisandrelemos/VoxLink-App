@@ -6,144 +6,161 @@ import {
   TouchableOpacity,
   StyleSheet,
   Image,
-  StatusBar,
+  SafeAreaView,
   KeyboardAvoidingView,
   Platform,
-  ScrollView,
-  SafeAreaView,
+  ScrollView
 } from 'react-native';
-import { Ionicons } from '@expo/vector-icons';
-import { useRouter } from 'expo-router';
+import { Entypo } from '@expo/vector-icons';
 
 export default function RegisterScreen() {
-  const router = useRouter();
+  const [name, setName] = useState('');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: '#191919' }}>
+    <SafeAreaView style={styles.safeArea}>
       <KeyboardAvoidingView
-        style={{ flex: 1 }}
-        behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
+        style={styles.container}
+        behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <ScrollView
-          contentContainerStyle={styles.scrollContent}
-          keyboardShouldPersistTaps="handled"
-        >
-          <StatusBar backgroundColor="#191919" barStyle="light-content" />
+        <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
+          <Image source={require('../../assets/images/logo.png')} style={styles.logo} />
+          <Text style={styles.title}>És Novo? Cria uma Conta!</Text>
 
-          <View style={styles.container}>
-            <Image source={require('../../assets/images/logo.png')} style={styles.logo} />
-            <Text style={styles.title}>És Novo? Cria uma Conta!</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="Nome"
+            placeholderTextColor="#ccc"
+            value={name}
+            onChangeText={setName}
+          />
+          <TextInput
+            style={styles.input}
+            placeholder="Email"
+            placeholderTextColor="#ccc"
+            value={email}
+            onChangeText={setEmail}
+            keyboardType="email-address"
+          />
 
-            <TextInput placeholder="Nome" placeholderTextColor="#999" style={styles.input} />
-            <TextInput placeholder="Email" placeholderTextColor="#999" style={styles.input} keyboardType="email-address" />
-
-            <View style={styles.inputWrapper}>
-              <TextInput
-                placeholder="Password"
-                placeholderTextColor="#999"
-                secureTextEntry={!showPassword}
-                style={styles.inputInside}
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={styles.inputPassword}
+              placeholder="Password"
+              placeholderTextColor="#ccc"
+              secureTextEntry={!showPassword}
+              value={password}
+              onChangeText={setPassword}
+            />
+            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+              <Entypo
+                name={showPassword ? 'eye-with-line' : 'eye'}
+                size={22}
+                color="#888"
               />
-              <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-                <Ionicons name={showPassword ? 'eye-off' : 'eye'} size={22} color="#ccc" />
-              </TouchableOpacity>
-            </View>
-
-            <View style={styles.inputWrapper}>
-              <TextInput
-                placeholder="Confirmação Password"
-                placeholderTextColor="#999"
-                secureTextEntry={!showConfirmPassword}
-                style={styles.inputInside}
-              />
-              <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
-                <Ionicons name={showConfirmPassword ? 'eye-off' : 'eye'} size={22} color="#ccc" />
-              </TouchableOpacity>
-            </View>
-
-            <TouchableOpacity style={styles.createButton}>
-              <Text style={styles.createButtonText}>Criar Conta</Text>
             </TouchableOpacity>
           </View>
-        </ScrollView>
 
-        <View style={styles.footerContainer}>
-          <Text style={styles.footer}>VoxLink</Text>
-        </View>
+          <View style={styles.passwordContainer}>
+            <TextInput
+              style={styles.inputPassword}
+              placeholder="Confirmação Password"
+              placeholderTextColor="#ccc"
+              secureTextEntry={!showConfirmPassword}
+              value={confirmPassword}
+              onChangeText={setConfirmPassword}
+            />
+            <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
+              <Entypo
+                name={showConfirmPassword ? 'eye-with-line' : 'eye'}
+                size={22}
+                color="#888"
+              />
+            </TouchableOpacity>
+          </View>
+
+          <TouchableOpacity style={styles.registerButton}>
+            <Text style={styles.registerButtonText}>Criar Conta</Text>
+          </TouchableOpacity>
+
+          <Text style={styles.footerText}>VoxLink</Text>
+        </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  scrollContent: {
-    flexGrow: 1,
-    justifyContent: 'center',
-    paddingHorizontal: 24,
+  safeArea: {
+    flex: 1,
+    backgroundColor: '#191919',
   },
   container: {
+    flex: 1,
+  },
+  scrollContainer: {
+    padding: 20,
     alignItems: 'center',
-    gap: 10,
+    marginTop: 60,
   },
   logo: {
     width: 100,
     height: 100,
     resizeMode: 'contain',
-    marginBottom: 10,
+    marginTop: 30,
+    marginBottom: 15,
   },
   title: {
-    fontSize: 18,
     color: '#fff',
-    fontFamily: 'Montserrat-SemiBold',
-    marginBottom: 20,
+    fontSize: 22,
+    fontFamily: 'Montserrat-Bold',
+    marginBottom: 25,
   },
   input: {
     width: '100%',
-    backgroundColor: '#2b2b2b',
-    paddingVertical: 12,
-    paddingHorizontal: 14,
-    borderRadius: 6,
-    color: '#fff',
-    marginBottom: 12,
-    fontFamily: 'Montserrat-SemiBold',
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    padding: 12,
+    marginBottom: 15,
+    fontFamily: 'Montserrat-Regular',
   },
-  inputWrapper: {
+  passwordContainer: {
     width: '100%',
-    backgroundColor: '#2b2b2b',
-    borderRadius: 6,
+    backgroundColor: '#fff',
+    borderRadius: 8,
+    paddingHorizontal: 12,
     flexDirection: 'row',
     alignItems: 'center',
-    paddingHorizontal: 14,
-    marginBottom: 12,
+    marginBottom: 15,
   },
-  inputInside: {
+  inputPassword: {
     flex: 1,
     paddingVertical: 12,
-    color: '#fff',
-    fontFamily: 'Montserrat-SemiBold',
+    fontFamily: 'Montserrat-Regular',
   },
-  createButton: {
-    backgroundColor: '#fff',
-    paddingVertical: 12,
-    borderRadius: 6,
+  registerButton: {
     width: '100%',
-    marginTop: 10,
+    backgroundColor: 'transparent',
+    borderWidth: 2,
+    borderColor: '#fff',
+    padding: 12,
+    borderRadius: 8,
+    alignItems: 'center',
+    marginBottom: 20,
   },
-  createButtonText: {
-    textAlign: 'center',
-    color: '#000',
+  registerButtonText: {
+    color: '#fff',
     fontSize: 16,
     fontFamily: 'Montserrat-Bold',
   },
-  footerContainer: {
-    alignItems: 'center',
-    paddingBottom: 20,
-  },
-  footer: {
-    fontSize: 24,
+  footerText: {
+    marginTop: 80,
     color: '#fff',
+    fontSize: 24,
     fontFamily: 'Montserrat-SemiBold',
   },
 });
