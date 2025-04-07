@@ -5,9 +5,14 @@ node_modules/
 
 # Expo
 .expo/
+.expo-shared/
 dist/
 web-build/
 expo-env.d.ts
+
+# Logs
+npm-debug.log
+yarn-error.log
 
 # Native
 *.orig.*
@@ -25,9 +30,9 @@ npm-debug.*
 yarn-debug.*
 yarn-error.*
 
-# macOS
+# macOS/Windows
 .DS_Store
-*.pem
+Thumbs.db
 
 # local env files
 .env*.local
