@@ -38,7 +38,11 @@ export default function HomeScreen() {
 
       {/* Navegação inferior */}
       <View style={styles.navBar}>
-        <Image source={require('../../assets/images/nav-home.png')} style={styles.navIcon} />
+        <View style={styles.navItem}>
+          <Image source={require('../../assets/images/nav-home.png')} style={styles.navIcon} />
+          <View style={styles.navIndicator} />
+        </View>
+
         <Image source={require('../../assets/images/nav-profile.png')} style={styles.navIcon} />
         <Image source={require('../../assets/images/logo.png')} style={styles.navLogo} />
         <Image source={require('../../assets/images/nav-settings.png')} style={styles.navIcon} />
@@ -108,4 +112,17 @@ const styles = StyleSheet.create({
     height: 55,
     resizeMode: 'contain',
   },
+
+  navItem: {
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  
+  navIndicator: {
+    width: 6,
+    height: 6,
+    backgroundColor: '#fff',
+    borderRadius: 3,
+    marginTop: 4,
+  },  
 });
