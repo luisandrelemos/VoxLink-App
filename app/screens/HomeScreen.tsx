@@ -1,8 +1,14 @@
 import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Dimensions, StatusBar } from 'react-native';
+import { useRouter } from 'expo-router';
+import { useState } from 'react';
+import BottomNavBar from '../components/BottomNavBar';
 
 const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
+  const router = useRouter();
+  const [activePage, setActivePage] = useState('home');
+
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor="#191919" barStyle="light-content" />
@@ -36,18 +42,7 @@ export default function HomeScreen() {
         </TouchableOpacity>
       </View>
 
-      {/* Navegação inferior */}
-      <View style={styles.navBar}>
-        <View style={styles.navItem}>
-          <Image source={require('../../assets/images/nav-home.png')} style={styles.navIcon} />
-          <View style={styles.navIndicator} />
-        </View>
-
-        <Image source={require('../../assets/images/nav-profile.png')} style={styles.navIcon} />
-        <Image source={require('../../assets/images/logo.png')} style={styles.navLogo} />
-        <Image source={require('../../assets/images/nav-settings.png')} style={styles.navIcon} />
-        <Image source={require('../../assets/images/nav-info.png')} style={styles.navIcon} />
-      </View>
+      <BottomNavBar/>
     </View>
   );
 }
@@ -87,42 +82,5 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat-SemiBold',
     textAlign: 'left',
     alignSelf: 'flex-start',
-  },
-  navBar: {
-    position: 'absolute',
-    bottom: 0,
-    backgroundColor: '#353535',
-    width: '100%',
-    height: 60,
-    borderTopLeftRadius: 15,
-    borderTopRightRadius: 15,
-    flexDirection: 'row',
-    justifyContent: 'space-around',
-    alignItems: 'center',
-  },
-
-  navIcon: {
-    width: 30,
-    height: 30,
-    tintColor: '#fff',
-    resizeMode: 'contain',
-  },
-  navLogo: {
-    width: 55,
-    height: 55,
-    resizeMode: 'contain',
-  },
-
-  navItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  
-  navIndicator: {
-    width: 6,
-    height: 6,
-    backgroundColor: '#fff',
-    borderRadius: 3,
-    marginTop: 4,
-  },  
+  }
 });
