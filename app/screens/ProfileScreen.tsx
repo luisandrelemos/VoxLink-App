@@ -57,6 +57,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
+    paddingHorizontal: 15,
   },
   backText: {
     color: '#fff',
@@ -71,6 +72,7 @@ const styles = StyleSheet.create({
   content: {
     alignItems: 'center',
     marginTop: 70,
+    paddingHorizontal: 15,
   },
   avatar: {
     width: 110,
@@ -89,7 +91,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat-Regular',
     fontSize: 14,
     color: '#aaa',
-    marginBottom: 30,
+    marginBottom: 60,
   },
   buttonOutline: {
     borderWidth: 1,
@@ -102,6 +104,7 @@ const styles = StyleSheet.create({
   },
   buttonOutlineText: {
     color: '#fff',
+    fontSize: 18,
     fontFamily: 'Montserrat-Bold',
   },
   buttonSolid: {
@@ -109,11 +112,11 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderRadius: 8,
     width: '100%',
-    marginTop: 10,
     alignItems: 'center',
   },
   buttonSolidText: {
     color: '#000',
+    fontSize: 18,
     fontFamily: 'Montserrat-Bold',
   },
 });
