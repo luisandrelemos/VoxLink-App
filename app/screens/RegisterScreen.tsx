@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import { Entypo } from '@expo/vector-icons';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../utils/firebaseConfig';
+import { auth } from '../../utils/firebaseConfig';
 import { useRouter } from 'expo-router';
 
 export default function RegisterScreen() {

@@ -7,7 +7,7 @@ import { Entypo } from '@expo/vector-icons';
 
 // Importa o signIn e a config do Firebase
 import { signInWithEmailAndPassword } from 'firebase/auth';
-import { auth } from '../utils/firebaseConfig';
+import { auth } from '../../utils/firebaseConfig';
 
 // Se quiseres redirecionar ao login, podes usar expo-router
 import { useRouter } from 'expo-router';
