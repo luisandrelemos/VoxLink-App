@@ -1,25 +1,43 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet, Image,
   Switch, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView, Alert
 } from 'react-native';
 import { Entypo } from '@expo/vector-icons';
-import { signInWithEmailAndPassword } from 'firebase/auth';
+import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../utils/firebaseConfig';
 import { useRouter } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [stayConnected, setStayConnected] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-
   const router = useRouter();
+
+  // Verificar se o utilizador quer ficar conectado
+  useEffect(() => {
+    async function checkStayConnected() {
+      const stayConnectedFlag = await AsyncStorage.getItem('stayConnected');
+      onAuthStateChanged(auth, (user) => {
+        if (user && stayConnectedFlag === 'true') {
+          router.replace('/home');
+        }
+      });
+    }
+    checkStayConnected();
+  }, []);
 
   // Login por email/password
   async function handleLogin() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
+      if (stayConnected) {
+        await AsyncStorage.setItem('stayConnected', 'true');
+      } else {
+        await AsyncStorage.removeItem('stayConnected');
+      }
       Alert.alert('Sucesso!', 'Login efetuado com sucesso!');
       router.replace('/home');
     } catch (error: any) {
