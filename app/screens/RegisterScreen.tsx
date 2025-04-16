@@ -1,17 +1,12 @@
 import React, { useState } from 'react';
 import {
-  View,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  StyleSheet,
-  Image,
-  SafeAreaView,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView
+  View, Text, TextInput, TouchableOpacity, StyleSheet, Image,
+  SafeAreaView, KeyboardAvoidingView, Platform, ScrollView, Alert
 } from 'react-native';
 import { Entypo } from '@expo/vector-icons';
+import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { auth } from '../utils/firebaseConfig';
+import { useRouter } from 'expo-router';
 
 export default function RegisterScreen() {
   const [name, setName] = useState('');
@@ -20,6 +15,23 @@ export default function RegisterScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const router = useRouter();
+
+  async function handleRegister() {
+    if (password !== confirmPassword) {
+      Alert.alert('Erro', 'As passwords não coincidem!');
+      return;
+    }
+
+    try {
+      await createUserWithEmailAndPassword(auth, email, password);
+      Alert.alert('Sucesso', 'Conta criada com sucesso!');
+      router.replace('/login');
+    } catch (error: any) {
+      Alert.alert('Erro no registo', error.message);
+    }
+  }
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -57,11 +69,7 @@ export default function RegisterScreen() {
               onChangeText={setPassword}
             />
             <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-              <Entypo
-                name={showPassword ? 'eye-with-line' : 'eye'}
-                size={22}
-                color="#888"
-              />
+              <Entypo name={showPassword ? 'eye-with-line' : 'eye'} size={22} color="#888" />
             </TouchableOpacity>
           </View>
 
@@ -75,15 +83,11 @@ export default function RegisterScreen() {
               onChangeText={setConfirmPassword}
             />
             <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
-              <Entypo
-                name={showConfirmPassword ? 'eye-with-line' : 'eye'}
-                size={22}
-                color="#888"
-              />
+              <Entypo name={showConfirmPassword ? 'eye-with-line' : 'eye'} size={22} color="#888" />
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={styles.registerButton}>
+          <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
             <Text style={styles.registerButtonText}>Criar Conta</Text>
           </TouchableOpacity>
 

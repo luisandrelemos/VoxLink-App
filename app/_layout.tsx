@@ -1,21 +1,22 @@
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useCallback } from 'react';
+import { View } from 'react-native';
+import { AuthProvider } from './context/AuthContext';
 import { Stack } from 'expo-router';
 
 export default function Layout() {
+  // Carregar as fontes
   const [fontsLoaded] = useFonts({
     'Montserrat-Regular': require('../assets/fonts/Montserrat-Regular.ttf'),
     'Montserrat-SemiBold': require('../assets/fonts/Montserrat-SemiBold.ttf'),
     'Montserrat-Bold': require('../assets/fonts/Montserrat-Bold.ttf'),
   });
 
-  // Impede que o splash desapareça até a fonte carregar
   useEffect(() => {
     async function prepare() {
       await SplashScreen.preventAutoHideAsync();
     }
-
     prepare();
   }, []);
 
@@ -30,11 +31,10 @@ export default function Layout() {
   }
 
   return (
-    <Stack
-      onLayout={onLayoutRootView}
-      screenOptions={{
-        headerShown: false,
-      }}
-    />
+    <AuthProvider>
+      <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
+        <Stack screenOptions={{ headerShown: false }} />
+      </View>
+    </AuthProvider>
   );
 }
