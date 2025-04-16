@@ -1,16 +1,24 @@
 import React, { useEffect } from 'react';
 import { View, Image, Text, StyleSheet, SafeAreaView, StatusBar } from 'react-native';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter } from 'expo-router';
 
 export default function SplashScreen() {
   const router = useRouter();
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      router.replace('/initialmenuscreen');
-    }, 2500);
+    const checkStayConnected = async () => {
+      const stayConnected = await AsyncStorage.getItem('@stayConnected');
+      setTimeout(() => {
+        if (stayConnected === 'true') {
+          router.replace('/home');
+        } else {
+          router.replace('/login');
+        }
+      }, 2000); // splash delay
+    };
 
-    return () => clearTimeout(timer);
+    checkStayConnected();
   }, []);
 
   return (

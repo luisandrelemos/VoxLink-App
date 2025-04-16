@@ -21,7 +21,7 @@ export default function InitialMenuScreen() {
         <Text style={styles.buttonOutlineText}>Criar Conta</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.socialButton} onPress={handleGoogleLogin}>
+      <TouchableOpacity style={styles.socialButton}>
         <Image source={require('../../assets/images/google-icon.png')} style={styles.icon} />
         <Text style={styles.socialText}>Entrar Com Google</Text>
       </TouchableOpacity>
