@@ -13,7 +13,7 @@ export default function SplashScreen() {
         if (stayConnected === 'true') {
           router.replace('/home');
         } else {
-          router.replace('/login');
+          router.replace('/initialmenuscreen');
         }
       }, 2000); // splash delay
     };
