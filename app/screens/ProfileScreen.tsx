@@ -1,9 +1,30 @@
 import { View, Text, StyleSheet, Image, TouchableOpacity, StatusBar } from 'react-native';
 import { useRouter } from 'expo-router';
 import BottomNavBar from '../components/BottomNavBar';
+import { getAuth, signOut } from 'firebase/auth';
+import { useEffect, useState } from 'react';
 
 export default function ProfileScreen() {
   const router = useRouter();
+  const [user, setUser] = useState<{ name?: string; email: string } | null>(null);
+
+  useEffect(() => {
+    const auth = getAuth();
+    const currentUser = auth.currentUser;
+
+    if (currentUser) {
+      setUser({
+        name: currentUser.displayName || 'Utilizador',
+        email: currentUser.email || '',
+      });
+    }
+  }, []);
+
+  const handleLogout = async () => {
+    const auth = getAuth();
+    await signOut(auth);
+    router.replace('/initialmenuscreen');
+  };
 
   return (
     <View style={styles.container}>
@@ -26,10 +47,9 @@ export default function ProfileScreen() {
           source={require('../../assets/images/profile-placeholder.png')}
           style={styles.avatar}
         />
-        <Text style={styles.name}>Your Name</Text>
-        <Text style={styles.email}>youremail@email.com</Text>
+        <Text style={styles.name}>{user?.name}</Text>
+        <Text style={styles.email}>{user?.email}</Text>
 
-        {/* Botões */}
         <TouchableOpacity style={styles.buttonOutline}>
           <Text style={styles.buttonOutlineText}>Editar Perfil</Text>
         </TouchableOpacity>
@@ -38,12 +58,12 @@ export default function ProfileScreen() {
           <Text style={styles.buttonOutlineText}>Preferências</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.buttonSolid}>
+        <TouchableOpacity style={styles.buttonSolid} onPress={handleLogout}>
           <Text style={styles.buttonSolidText}>Terminar Sessão</Text>
         </TouchableOpacity>
       </View>
 
-      <BottomNavBar/>
+      <BottomNavBar />
     </View>
   );
 }
