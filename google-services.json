@@ -1,0 +1,47 @@
+{
+  "project_info": {
+    "project_number": "847261915494",
+    "project_id": "voxlink-8ce17",
+    "storage_bucket": "voxlink-8ce17.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:847261915494:android:74aadfbdbd41263fbdd0a7",
+        "android_client_info": {
+          "package_name": "com.voxlink.app"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "847261915494-c89rejg7dhaqtb5mqu2p5vnfoubkqcd2.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.voxlink.app",
+            "certificate_hash": "f31c50db479ef4bf094ed06f9cfca859c6060f43"
+          }
+        },
+        {
+          "client_id": "847261915494-o294814e1vne5onv69q0kuv4olnceo0e.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAYNv4VuV0PLaC7Adgv6HxnEIxwI4_Vb6c"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "847261915494-o294814e1vne5onv69q0kuv4olnceo0e.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
