@@ -5,7 +5,7 @@ import {
 } from 'react-native';
 import BottomNavBar from '../components/BottomNavBar';
 import * as ImagePicker from 'expo-image-picker';
-import { getAuth, signOut, updateProfile, updatePassword } from 'firebase/auth';
+import { getAuth, signOut, updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import { useRouter } from 'expo-router';
 
 export default function ProfileScreen() {
@@ -17,6 +17,7 @@ export default function ProfileScreen() {
   const [isModalVisible, setModalVisible] = useState(false);
   const [newName, setNewName] = useState('');
   const [newPassword, setNewPassword] = useState('');
+  const [currentPassword, setCurrentPassword] = useState('');
   const [imageUri, setImageUri] = useState<string | null>(null);
 
   useEffect(() => {
@@ -45,28 +46,40 @@ export default function ProfileScreen() {
 
   const handleSaveChanges = async () => {
     try {
-      if (currentUser) {
-        if (newName || imageUri) {
-          await updateProfile(currentUser, {
-            displayName: newName || currentUser.displayName,
-            photoURL: imageUri || currentUser.photoURL,
-          });
-        }
+      if (!currentUser) return;
 
-        if (newPassword) {
-          await updatePassword(currentUser, newPassword);
-        }
-
-        Alert.alert('Sucesso', 'Dados atualizados com sucesso!');
-        setModalVisible(false);
-        setNewName('');
-        setNewPassword('');
-        setUser({
-          name: currentUser.displayName || '',
-          email: currentUser.email || '',
-          photoURL: currentUser.photoURL ?? undefined
+      // Atualização do nome ou imagem
+      if (newName || imageUri) {
+        await updateProfile(currentUser, {
+          displayName: newName || currentUser.displayName,
+          photoURL: imageUri || currentUser.photoURL,
         });
       }
+
+      // Se for para alterar a password
+      if (newPassword) {
+        if (!currentPassword) {
+          Alert.alert('Erro', 'Introduz a tua password atual para confirmar.');
+          return;
+        }
+
+        const credential = EmailAuthProvider.credential(currentUser.email!, currentPassword);
+        await reauthenticateWithCredential(currentUser, credential);
+
+        await updatePassword(currentUser, newPassword);
+      }
+
+      Alert.alert('Sucesso', 'Dados atualizados com sucesso!');
+      setModalVisible(false);
+      setNewName('');
+      setNewPassword('');
+      setCurrentPassword('');
+      setUser({
+        name: currentUser.displayName || '',
+        email: currentUser.email || '',
+        photoURL: currentUser.photoURL ?? undefined
+      });
+
     } catch (error: any) {
       Alert.alert('Erro', error.message);
     }
@@ -96,8 +109,8 @@ export default function ProfileScreen() {
             imageUri
               ? { uri: imageUri }
               : user?.photoURL
-              ? { uri: user.photoURL }
-              : require('../../assets/images/profile-placeholder.png')
+                ? { uri: user.photoURL }
+                : require('../../assets/images/profile-placeholder.png')
           }
           style={styles.avatar}
         />
@@ -129,8 +142,8 @@ export default function ProfileScreen() {
                   imageUri
                     ? { uri: imageUri }
                     : user?.photoURL
-                    ? { uri: user.photoURL }
-                    : require('../../assets/images/profile-placeholder.png')
+                      ? { uri: user.photoURL }
+                      : require('../../assets/images/profile-placeholder.png')
                 }
                 style={styles.avatar}
               />
@@ -144,6 +157,16 @@ export default function ProfileScreen() {
               value={newName}
               onChangeText={setNewName}
             />
+
+            <TextInput
+              style={styles.input}
+              placeholder="Password atual"
+              placeholderTextColor="#aaa"
+              secureTextEntry
+              value={currentPassword}
+              onChangeText={setCurrentPassword}
+            />
+
             <TextInput
               style={styles.input}
               placeholder="Nova password"
