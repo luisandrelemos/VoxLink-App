@@ -4,12 +4,8 @@ import {
   Switch, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView, Alert
 } from 'react-native';
 import { Entypo } from '@expo/vector-icons';
-
-// Importa o signIn e a config do Firebase
 import { signInWithEmailAndPassword } from 'firebase/auth';
 import { auth } from '../../utils/firebaseConfig';
-
-// Se quiseres redirecionar ao login, podes usar expo-router
 import { useRouter } from 'expo-router';
 
 export default function LoginScreen() {
@@ -20,6 +16,7 @@ export default function LoginScreen() {
 
   const router = useRouter();
 
+  // Login por email/password
   async function handleLogin() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
@@ -37,9 +34,13 @@ export default function LoginScreen() {
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
         <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-          <Image source={require('../../assets/images/logo.png')} style={styles.logo} />
+          <Image
+            source={require('../../assets/images/logo.png')}
+            style={styles.logo}
+          />
           <Text style={styles.title}>Olá de Novo!</Text>
 
+          {/* Campo Email */}
           <TextInput
             style={styles.input}
             placeholder="Email"
@@ -49,6 +50,7 @@ export default function LoginScreen() {
             keyboardType="email-address"
           />
 
+          {/* Campo Password */}
           <View style={styles.passwordContainer}>
             <TextInput
               style={styles.inputPassword}
@@ -67,6 +69,7 @@ export default function LoginScreen() {
             </TouchableOpacity>
           </View>
 
+          {/* Switch Ficar Conectado */}
           <View style={styles.stayConnected}>
             <Text style={styles.stayConnectedText}>Ficar Conectado</Text>
             <Switch
@@ -77,19 +80,52 @@ export default function LoginScreen() {
             />
           </View>
 
-          {/* Botão de Login que chama handleLogin */}
+          {/* Botão Entrar Email/Password */}
           <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
             <Text style={styles.loginButtonText}>Entrar</Text>
           </TouchableOpacity>
 
-          {/* Continuação do teu layout - forgot password, social logins, etc. */}
-          {/* ... */}
+          {/* Esqueceu Password */}
+          <TouchableOpacity>
+            <Text style={styles.forgotPassword}>Esqueceu-se da Password?</Text>
+          </TouchableOpacity>
+
+          {/* Divider */}
+          <View style={styles.dividerContainer}>
+            <View style={styles.line} />
+            <Text style={styles.orText}>ou</Text>
+            <View style={styles.line} />
+          </View>
+
+          {/* Botões de Login Social */}
+          <View style={styles.socialButtons}>
+            {/* Google (inativo, só visual) */}
+            <TouchableOpacity style={styles.socialButton}>
+              <Image
+                source={require('../../assets/images/google-icon.png')}
+                style={styles.icon}
+              />
+              <Text style={styles.socialText}>Google</Text>
+            </TouchableOpacity>
+
+            {/* Facebook (inativo) */}
+            <TouchableOpacity style={styles.socialButton}>
+              <Image
+                source={require('../../assets/images/facebook-icon.png')}
+                style={styles.icon}
+              />
+              <Text style={styles.socialText}>Facebook</Text>
+            </TouchableOpacity>
+          </View>
+
+          <Text style={styles.footerText}>VoxLink</Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
+// Estilos
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
