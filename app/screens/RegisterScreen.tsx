@@ -4,7 +4,7 @@ import {
   SafeAreaView, KeyboardAvoidingView, Platform, ScrollView, Alert
 } from 'react-native';
 import { Entypo } from '@expo/vector-icons';
-import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth } from '../../utils/firebaseConfig';
 import { useRouter } from 'expo-router';
 
@@ -25,7 +25,13 @@ export default function RegisterScreen() {
     }
 
     try {
-      await createUserWithEmailAndPassword(auth, email, password);
+      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+
+      // Atualizar o nome no perfil do Firebase
+      await updateProfile(userCredential.user, {
+        displayName: name,
+      });
+
       Alert.alert('Sucesso', 'Conta criada com sucesso!');
       router.replace('/login');
     } catch (error: any) {
