@@ -1,16 +1,25 @@
 import { View, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
+import useHaptics from '../../utils/useHaptics';
 
 export default function BottomNavBar() {
   const router = useRouter();
   const pathname = usePathname();
+  const triggerHaptic = useHaptics();
 
   const isActive = (path: string) => pathname === path;
 
   return (
     <View style={styles.navBar}>
       {/* Home */}
-      <TouchableOpacity onPress={() => router.replace('/home')}>
+      <TouchableOpacity
+        onPress={() => {
+          if (!isActive('/home')) {
+            triggerHaptic();
+            router.replace('/home');
+          }
+        }}
+      >
         <View style={styles.navItem}>
           <Image
             source={require('../../assets/images/nav-home.png')}
@@ -21,7 +30,14 @@ export default function BottomNavBar() {
       </TouchableOpacity>
 
       {/* Profile */}
-      <TouchableOpacity onPress={() => router.replace('/account')}>
+      <TouchableOpacity
+        onPress={() => {
+          if (!isActive('/account')) {
+            triggerHaptic();
+            router.replace('/account');
+          }
+        }}
+      >
         <View style={styles.navItem}>
           <Image
             source={require('../../assets/images/nav-profile.png')}
@@ -32,10 +48,20 @@ export default function BottomNavBar() {
       </TouchableOpacity>
 
       {/* Logo central */}
-      <Image source={require('../../assets/images/logo.png')} style={styles.navLogo} />
+      <Image
+        source={require('../../assets/images/logo.png')}
+        style={styles.navLogo}
+      />
 
       {/* Settings */}
-      <TouchableOpacity onPress={() => router.replace('/settings')}>
+      <TouchableOpacity
+        onPress={() => {
+          if (!isActive('/settings')) {
+            triggerHaptic();
+            router.replace('/settings');
+          }
+        }}
+      >
         <View style={styles.navItem}>
           <Image
             source={require('../../assets/images/nav-settings.png')}
@@ -46,7 +72,14 @@ export default function BottomNavBar() {
       </TouchableOpacity>
 
       {/* Info */}
-      <TouchableOpacity onPress={() => router.replace('/info')}>
+      <TouchableOpacity
+        onPress={() => {
+          if (!isActive('/info')) {
+            triggerHaptic();
+            router.replace('/info');
+          }
+        }}
+      >
         <View style={styles.navItem}>
           <Image
             source={require('../../assets/images/nav-info.png')}
@@ -88,7 +121,7 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
   },
   active: {
-    tintColor: '#fff', // redundante mas claro
+    tintColor: '#fff',
   },
   navIndicator: {
     width: 6,

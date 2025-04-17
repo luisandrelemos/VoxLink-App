@@ -1,11 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import {
   View, Text, StyleSheet, Image, TouchableOpacity, StatusBar,
-  Switch, FlatList, Modal} from 'react-native';
+  Switch, FlatList, Modal
+} from 'react-native';
 import Slider from '@react-native-community/slider';
 import { useRouter } from 'expo-router';
 import BottomNavBar from '../components/BottomNavBar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import useHaptics from '../../utils/useHaptics';
 
 // Dados
 const languages = [
@@ -64,6 +66,8 @@ export default function SettingsScreen() {
     loadPreferences();
   }, []);
 
+  const triggerHaptic = useHaptics();
+
   const handleFontSizeChange = async (value: number) => {
     setFontSizeValue(value);
     await AsyncStorage.setItem('fontSizeValue', value.toString());
@@ -75,7 +79,7 @@ export default function SettingsScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.push('/home')}>
+        <TouchableOpacity onPress={() => { router.push('/home'); triggerHaptic(); }}>
           <Text style={styles.backText}>← Definições</Text>
         </TouchableOpacity>
         <Image source={require('../../assets/images/logo-header.png')} style={styles.logo} />
@@ -83,9 +87,10 @@ export default function SettingsScreen() {
 
       {/* Conteúdo */}
       <View style={styles.content}>
+
         {/* Idioma */}
         <Text style={styles.label}>Idioma</Text>
-        <TouchableOpacity style={styles.dropdown} onPress={() => setLangModalVisible(true)}>
+        <TouchableOpacity style={styles.dropdown} onPress={() => { setLangModalVisible(true); triggerHaptic(); }}>
           <Image source={selectedLang.flag} style={styles.flag} />
           <Text style={styles.dropdownText}>{selectedLang.label}</Text>
         </TouchableOpacity>
@@ -104,6 +109,7 @@ export default function SettingsScreen() {
                       setSelectedLang(item);
                       await AsyncStorage.setItem('selectedLang', JSON.stringify(item));
                       setLangModalVisible(false);
+                      triggerHaptic();
                     }}
                   >
                     <Image source={item.flag} style={styles.flag} />
@@ -118,25 +124,27 @@ export default function SettingsScreen() {
         {/* Tamanho do texto */}
         <Text style={styles.label}>Tamanho Do Texto</Text>
         <View style={styles.sliderTrack}>
-        <Text style={[styles.sliderLabel, { fontSize: 13}]}>aA</Text>
-        <Slider
-          minimumValue={0}
-          maximumValue={1}
-          step={0.5}
-          value={fontSizeValue}
-          onValueChange={handleFontSizeChange}
-          minimumTrackTintColor="#fff"
-          maximumTrackTintColor="#444"
-          thumbTintColor="#fff"
-          style={{ flex: 1 }}
-        />
-        <Text style={[styles.sliderLabel, { fontSize: 18}]}>aA</Text>
-      </View>
-
+          <Text style={[styles.sliderLabel, { fontSize: 13 }]}>aA</Text>
+          <Slider
+            minimumValue={0}
+            maximumValue={1}
+            step={0.5}
+            value={fontSizeValue}
+            onValueChange={(value) => {
+              handleFontSizeChange(value);
+              triggerHaptic();
+            }}
+            minimumTrackTintColor="#fff"
+            maximumTrackTintColor="#444"
+            thumbTintColor="#fff"
+            style={{ flex: 1 }}
+          />
+          <Text style={[styles.sliderLabel, { fontSize: 18 }]}>aA</Text>
+        </View>
 
         {/* Tema */}
         <Text style={styles.label}>Tema Alto Contraste</Text>
-        <TouchableOpacity style={styles.dropdown} onPress={() => setThemeModalVisible(true)}>
+        <TouchableOpacity style={styles.dropdown} onPress={() => { setThemeModalVisible(true); triggerHaptic(); }}>
           <Image source={selectedTheme.icon} style={styles.optionIcon} />
           <Text style={styles.dropdownText}>{selectedTheme.label}</Text>
         </TouchableOpacity>
@@ -155,6 +163,7 @@ export default function SettingsScreen() {
                       setSelectedTheme(item);
                       await AsyncStorage.setItem('selectedTheme', JSON.stringify(item));
                       setThemeModalVisible(false);
+                      triggerHaptic();
                     }}
                   >
                     <Image source={item.icon} style={styles.optionIcon} />
@@ -168,7 +177,7 @@ export default function SettingsScreen() {
 
         {/* Tipo de Utilizador */}
         <Text style={styles.label}>Tipo de Utilizador</Text>
-        <TouchableOpacity style={styles.dropdown} onPress={() => setUserTypeModalVisible(true)}>
+        <TouchableOpacity style={styles.dropdown} onPress={() => { setUserTypeModalVisible(true); triggerHaptic(); }}>
           <Image source={selectedUserType.icon} style={styles.optionIcon} />
           <Text style={styles.dropdownText}>{selectedUserType.label}</Text>
         </TouchableOpacity>
@@ -187,6 +196,7 @@ export default function SettingsScreen() {
                       setSelectedUserType(item);
                       await AsyncStorage.setItem('selectedUserType', JSON.stringify(item));
                       setUserTypeModalVisible(false);
+                      triggerHaptic();
                     }}
                   >
                     <Image source={item.icon} style={styles.optionIcon} />
@@ -199,47 +209,28 @@ export default function SettingsScreen() {
         </Modal>
 
         {/* Switches */}
-        <View style={styles.switchRow}>
-          <View>
-            <Text style={styles.switchLabel}>Notificações</Text>
-            <Text style={styles.switchDescription}>Alertas Sonoros</Text>
+        {[
+          { label: 'Notificações', desc: 'Alertas Sonoros', value: notifications, setter: setNotifications, key: 'notifications' },
+          { label: 'Feedback Tátil', desc: 'Vibração em Interações', value: hapticFeedback, setter: setHapticFeedback, key: 'hapticFeedback' },
+          { label: 'Comandos por Voz', desc: 'Ative a navegação por voz', value: voiceCommands, setter: setVoiceCommands, key: 'voiceCommands' },
+        ].map((item, i) => (
+          <View style={styles.switchRow} key={i}>
+            <View>
+              <Text style={styles.switchLabel}>{item.label}</Text>
+              <Text style={styles.switchDescription}>{item.desc}</Text>
+            </View>
+            <Switch
+              value={item.value}
+              onValueChange={async (val) => {
+                item.setter(val);
+                await AsyncStorage.setItem(item.key, JSON.stringify(val));
+                triggerHaptic();
+              }}
+              trackColor={{ false: '#444', true: '#fff' }}
+              thumbColor="#fff"
+            />
           </View>
-          <Switch value={notifications} onValueChange={async (val) => {
-            setNotifications(val);
-            await AsyncStorage.setItem('notifications', JSON.stringify(val));
-          }}
-          trackColor={{ false: '#444', true: '#fff' }}
-          thumbColor="#fff" 
-          />
-        </View>
-
-        <View style={styles.switchRow}>
-          <View>
-            <Text style={styles.switchLabel}>Feedback Tátil</Text>
-            <Text style={styles.switchDescription}>Vibração em Interações</Text>
-          </View>
-          <Switch value={hapticFeedback} onValueChange={async (val) => {
-            setHapticFeedback(val);
-            await AsyncStorage.setItem('hapticFeedback', JSON.stringify(val));
-          }}
-          trackColor={{ false: '#444', true: '#fff' }}
-          thumbColor="#fff" 
-          />
-        </View>
-
-        <View style={styles.switchRow}>
-          <View>
-            <Text style={styles.switchLabel}>Comandos por Voz</Text>
-            <Text style={styles.switchDescription}>Ative a navegação por voz</Text>
-          </View>
-          <Switch value={voiceCommands} onValueChange={async (val) => {
-            setVoiceCommands(val);
-            await AsyncStorage.setItem('voiceCommands', JSON.stringify(val));
-          }}
-          trackColor={{ false: '#444', true: '#fff' }}
-          thumbColor="#fff" 
-          />
-        </View>
+        ))}
 
         <Text style={styles.footer}>VoxLink{"\n"}Versão 1.0</Text>
       </View>
@@ -252,78 +243,113 @@ export default function SettingsScreen() {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#191919' },
   header: {
-    flexDirection: 'row', justifyContent: 'space-between',
-    alignItems: 'center', paddingHorizontal: 15,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    paddingHorizontal: 15,
   },
   backText: {
-    color: '#fff', fontFamily: 'Montserrat-SemiBold', fontSize: 16,
+    color: '#fff',
+    fontFamily: 'Montserrat-SemiBold',
+    fontSize: 16,
   },
   logo: {
-    width: 110, height: 40, resizeMode: 'contain',
+    width: 110,
+    height: 40,
+    resizeMode: 'contain',
   },
   content: { paddingHorizontal: 20 },
   label: {
-    color: '#fff', fontSize: 16, fontFamily: 'Montserrat-Bold',
-    marginBottom: 6, marginTop: 15,
+    color: '#fff',
+    fontSize: 16,
+    fontFamily: 'Montserrat-Bold',
+    marginBottom: 6,
+    marginTop: 15,
   },
   dropdown: {
-    borderWidth: 1, borderColor: '#fff', padding: 12,
-    borderRadius: 8, flexDirection: 'row', alignItems: 'center',
+    borderWidth: 1,
+    borderColor: '#fff',
+    padding: 12,
+    borderRadius: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
   },
   dropdownText: {
-    color: '#fff', fontSize: 14, fontFamily: 'Montserrat-Regular',
+    color: '#fff',
+    fontSize: 14,
+    fontFamily: 'Montserrat-Regular',
   },
   flag: {
-    width: 24, height: 16, marginRight: 10, resizeMode: 'contain',
+    width: 24,
+    height: 16,
+    marginRight: 10,
+    resizeMode: 'contain',
   },
   optionIcon: {
-    width: 20, height: 20, marginRight: 10, resizeMode: 'contain',
+    width: 20,
+    height: 20,
+    marginRight: 10,
+    resizeMode: 'contain',
   },
   sliderTrack: {
-    flexDirection: 'row', alignItems: 'center',
-    justifyContent: 'space-between', marginTop: 5,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+    marginTop: 5,
   },
   sliderLabel: {
-    color: '#fff', fontSize: 14, fontFamily: 'Montserrat-Regular',
-  },
-  sliderBar: {
-    flex: 1, height: 2, backgroundColor: '#aaa',
-    marginHorizontal: 10, position: 'relative',
-  },
-  sliderKnob: {
-    width: 12, height: 12, borderRadius: 6,
-    backgroundColor: '#fff', position: 'absolute',
-    top: -5, left: '50%',
+    color: '#fff',
+    fontSize: 14,
+    fontFamily: 'Montserrat-Regular',
   },
   switchRow: {
-    marginTop: 20, flexDirection: 'row',
-    justifyContent: 'space-between', alignItems: 'center',
+    marginTop: 20,
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
   },
   switchLabel: {
-    color: '#fff', fontSize: 16, fontFamily: 'Montserrat-Bold',
+    color: '#fff',
+    fontSize: 16,
+    fontFamily: 'Montserrat-Bold',
   },
   switchDescription: {
-    color: '#aaa', fontSize: 14, fontFamily: 'Montserrat-Regular',
+    color: '#aaa',
+    fontSize: 14,
+    fontFamily: 'Montserrat-Regular',
   },
   footer: {
-    color: '#aaa', textAlign: 'center', marginTop: 40,
-    fontFamily: 'Montserrat-SemiBold', fontSize: 14,
+    color: '#aaa',
+    textAlign: 'center',
+    marginTop: 40,
+    fontFamily: 'Montserrat-SemiBold',
+    fontSize: 14,
   },
   modalOverlay: {
-    flex: 1, backgroundColor: '#00000088',
-    justifyContent: 'center', alignItems: 'center',
+    flex: 1,
+    backgroundColor: '#00000088',
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   langModal: {
-    backgroundColor: '#2a2a2a', borderRadius: 12,
-    width: '80%', paddingVertical: 20, paddingHorizontal: 15,
+    backgroundColor: '#2a2a2a',
+    borderRadius: 12,
+    width: '80%',
+    paddingVertical: 20,
+    paddingHorizontal: 15,
   },
   modalTitle: {
-    color: '#fff', fontSize: 16, fontFamily: 'Montserrat-Bold',
-    marginBottom: 15, textAlign: 'center',
+    color: '#fff',
+    fontSize: 16,
+    fontFamily: 'Montserrat-Bold',
+    marginBottom: 15,
+    textAlign: 'center',
   },
   langOption: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingVertical: 12, paddingHorizontal: 10,
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    paddingHorizontal: 10,
     borderRadius: 6,
   },
   selected: {
