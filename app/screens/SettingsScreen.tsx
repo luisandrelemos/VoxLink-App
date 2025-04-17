@@ -132,22 +132,19 @@ export default function SettingsScreen() {
           <Slider
             minimumValue={0}
             maximumValue={1}
-            step={0.5}
             value={fontSizeValue}
-            onValueChange={(value) => {
-              handleFontSizeChange(value);
-              if (sliderInteracted) {
-                triggerHaptic();
-                triggerSound();
-              } else {
-                setSliderInteracted(true);
-              }
+            onSlidingComplete={(value) => {
+              const rounded = Math.round(value * 2) / 2; // arredonda para 0, 0.5 ou 1
+              handleFontSizeChange(rounded);
+              triggerHaptic();
+              triggerSound();
             }}
             minimumTrackTintColor="#fff"
             maximumTrackTintColor="#444"
             thumbTintColor="#fff"
             style={{ flex: 1 }}
           />
+
           <Text style={[styles.sliderLabel, { fontSize: 18 }]}>aA</Text>
         </View>
 
