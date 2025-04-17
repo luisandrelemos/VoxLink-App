@@ -8,6 +8,7 @@ import { useRouter } from 'expo-router';
 import BottomNavBar from '../components/BottomNavBar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import useHaptics from '../../utils/useHaptics';
+import useClickSound from '../../utils/useClickSound';
 
 // Dados
 const languages = [
@@ -41,7 +42,7 @@ export default function SettingsScreen() {
 
   const [sliderInteracted, setSliderInteracted] = useState(false);
   const [fontSizeValue, setFontSizeValue] = useState(0.5);
-  const [notifications, setNotifications] = useState(false);
+  const [feedbackSound, setFeedbackSound] = useState(false);
   const [hapticFeedback, setHapticFeedback] = useState(false);
   const [voiceCommands, setVoiceCommands] = useState(false);
 
@@ -51,7 +52,7 @@ export default function SettingsScreen() {
       const theme = await AsyncStorage.getItem('selectedTheme');
       const type = await AsyncStorage.getItem('selectedUserType');
       const font = await AsyncStorage.getItem('fontSizeValue');
-      const notif = await AsyncStorage.getItem('notifications');
+      const sound = await AsyncStorage.getItem('feedbackSound');
       const haptic = await AsyncStorage.getItem('hapticFeedback');
       const voice = await AsyncStorage.getItem('voiceCommands');
 
@@ -59,7 +60,7 @@ export default function SettingsScreen() {
       if (theme) setSelectedTheme(JSON.parse(theme));
       if (type) setSelectedUserType(JSON.parse(type));
       if (font) setFontSizeValue(parseFloat(font));
-      if (notif) setNotifications(JSON.parse(notif));
+      if (sound) setFeedbackSound(JSON.parse(sound));
       if (haptic) setHapticFeedback(JSON.parse(haptic));
       if (voice) setVoiceCommands(JSON.parse(voice));
     };
@@ -68,6 +69,7 @@ export default function SettingsScreen() {
   }, []);
 
   const triggerHaptic = useHaptics();
+  const triggerSound = useClickSound();
 
   const handleFontSizeChange = async (value: number) => {
     setFontSizeValue(value);
@@ -80,7 +82,7 @@ export default function SettingsScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => { router.push('/home'); triggerHaptic(); }}>
+        <TouchableOpacity onPress={() => { router.push('/home'); triggerHaptic(); triggerSound();}}>
           <Text style={styles.backText}>← Definições</Text>
         </TouchableOpacity>
         <Image source={require('../../assets/images/logo-header.png')} style={styles.logo} />
@@ -91,7 +93,7 @@ export default function SettingsScreen() {
 
         {/* Idioma */}
         <Text style={styles.label}>Idioma</Text>
-        <TouchableOpacity style={styles.dropdown} onPress={() => { setLangModalVisible(true); triggerHaptic(); }}>
+        <TouchableOpacity style={styles.dropdown} onPress={() => { setLangModalVisible(true); triggerHaptic(); triggerSound();}}>
           <Image source={selectedLang.flag} style={styles.flag} />
           <Text style={styles.dropdownText}>{selectedLang.label}</Text>
         </TouchableOpacity>
@@ -111,6 +113,7 @@ export default function SettingsScreen() {
                       await AsyncStorage.setItem('selectedLang', JSON.stringify(item));
                       setLangModalVisible(false);
                       triggerHaptic();
+                      triggerSound();
                     }}
                   >
                     <Image source={item.flag} style={styles.flag} />
@@ -135,6 +138,7 @@ export default function SettingsScreen() {
               handleFontSizeChange(value);
               if (sliderInteracted) {
                 triggerHaptic();
+                triggerSound();
               } else {
                 setSliderInteracted(true);
               }
@@ -149,7 +153,7 @@ export default function SettingsScreen() {
 
         {/* Tema */}
         <Text style={styles.label}>Tema Alto Contraste</Text>
-        <TouchableOpacity style={styles.dropdown} onPress={() => { setThemeModalVisible(true); triggerHaptic(); }}>
+        <TouchableOpacity style={styles.dropdown} onPress={() => { setThemeModalVisible(true); triggerHaptic(); triggerSound();}}>
           <Image source={selectedTheme.icon} style={styles.optionIcon} />
           <Text style={styles.dropdownText}>{selectedTheme.label}</Text>
         </TouchableOpacity>
@@ -169,6 +173,7 @@ export default function SettingsScreen() {
                       await AsyncStorage.setItem('selectedTheme', JSON.stringify(item));
                       setThemeModalVisible(false);
                       triggerHaptic();
+                      triggerSound();
                     }}
                   >
                     <Image source={item.icon} style={styles.optionIcon} />
@@ -182,7 +187,7 @@ export default function SettingsScreen() {
 
         {/* Tipo de Utilizador */}
         <Text style={styles.label}>Tipo de Utilizador</Text>
-        <TouchableOpacity style={styles.dropdown} onPress={() => { setUserTypeModalVisible(true); triggerHaptic(); }}>
+        <TouchableOpacity style={styles.dropdown} onPress={() => { setUserTypeModalVisible(true); triggerHaptic(); triggerSound();}}>
           <Image source={selectedUserType.icon} style={styles.optionIcon} />
           <Text style={styles.dropdownText}>{selectedUserType.label}</Text>
         </TouchableOpacity>
@@ -202,6 +207,7 @@ export default function SettingsScreen() {
                       await AsyncStorage.setItem('selectedUserType', JSON.stringify(item));
                       setUserTypeModalVisible(false);
                       triggerHaptic();
+                      triggerSound();
                     }}
                   >
                     <Image source={item.icon} style={styles.optionIcon} />
@@ -215,7 +221,7 @@ export default function SettingsScreen() {
 
         {/* Switches */}
         {[
-          { label: 'Notificações', desc: 'Alertas Sonoros', value: notifications, setter: setNotifications, key: 'notifications' },
+          { label: 'Feedback Sonoro', desc: 'Sons em interações', value: feedbackSound, setter: setFeedbackSound, key: 'feedbackSound' },
           { label: 'Feedback Tátil', desc: 'Vibração em Interações', value: hapticFeedback, setter: setHapticFeedback, key: 'hapticFeedback' },
           { label: 'Comandos por Voz', desc: 'Ative a navegação por voz', value: voiceCommands, setter: setVoiceCommands, key: 'voiceCommands' },
         ].map((item, i) => (
@@ -230,6 +236,7 @@ export default function SettingsScreen() {
                 item.setter(val);
                 await AsyncStorage.setItem(item.key, JSON.stringify(val));
                 triggerHaptic();
+                triggerSound();
               }}
               trackColor={{ false: '#444', true: '#fff' }}
               thumbColor="#fff"
