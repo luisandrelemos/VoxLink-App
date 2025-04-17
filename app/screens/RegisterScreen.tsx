@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import {
   View, Text, TextInput, TouchableOpacity, StyleSheet, Image,
-  SafeAreaView, KeyboardAvoidingView, Platform, ScrollView, Alert
+  SafeAreaView, KeyboardAvoidingView, Platform, ScrollView, Alert, Switch, Modal
 } from 'react-native';
 import { Entypo } from '@expo/vector-icons';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
@@ -15,10 +15,17 @@ export default function RegisterScreen() {
   const [confirmPassword, setConfirmPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [termsVisible, setTermsVisible] = useState(false);
 
   const router = useRouter();
 
   async function handleRegister() {
+    if (!acceptedTerms) {
+      Alert.alert('Termos', 'Deves aceitar os Termos e Condições antes de prosseguir.');
+      return;
+    }
+
     if (password !== confirmPassword) {
       Alert.alert('Erro', 'As passwords não coincidem!');
       return;
@@ -26,12 +33,7 @@ export default function RegisterScreen() {
 
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-
-      // Atualizar o nome no perfil do Firebase
-      await updateProfile(userCredential.user, {
-        displayName: name,
-      });
-
+      await updateProfile(userCredential.user, { displayName: name });
       Alert.alert('Sucesso', 'Conta criada com sucesso!');
       router.replace('/login');
     } catch (error: any) {
@@ -93,25 +95,87 @@ export default function RegisterScreen() {
             </TouchableOpacity>
           </View>
 
+          {/* Switch + Link para Termos */}
+          <View style={styles.termsRow}>
+            <Switch
+              value={acceptedTerms}
+              onValueChange={setAcceptedTerms}
+              trackColor={{ false: '#555', true: '#ccc' }}
+              thumbColor={acceptedTerms ? '#fff' : '#888'}
+            />
+            <TouchableOpacity onPress={() => setTermsVisible(true)}>
+              <Text style={styles.termsText}>
+                Aceito os <Text style={styles.termsLink}>Termos e Condições</Text>
+              </Text>
+            </TouchableOpacity>
+          </View>
+
           <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
             <Text style={styles.registerButtonText}>Criar Conta</Text>
           </TouchableOpacity>
 
           <Text style={styles.footerText}>VoxLink</Text>
         </ScrollView>
+
+        {/* Modal com os Termos */}
+        <Modal visible={termsVisible} animationType="slide" onRequestClose={() => setTermsVisible(false)}>
+          <View style={styles.modalContainer}>
+            <View style={styles.modalHeader}>
+              <TouchableOpacity onPress={() => setTermsVisible(false)}>
+                <Text style={styles.modalBack}>←</Text>
+              </TouchableOpacity>
+              <Image source={require('../../assets/images/logo-header.png')} style={styles.modalLogo} />
+            </View>
+            <ScrollView contentContainerStyle={styles.modalContent}>
+              <Text style={styles.modalTitle}>Termos e Condições</Text>
+              <Text style={styles.modalText}>
+                {`1. Aceitação dos Termos\n`}
+                <Text style={styles.modalSubTitle}>
+                  Ao utilizar a aplicação VoxLink, concorda com os presentes Termos e Condições.
+                </Text>
+
+                {`\n\n2. Objetivo da Aplicação\n`}
+                <Text style={styles.modalSubTitle}>
+                  A VoxLink visa fornecer uma experiência acessível e inclusiva a todos os utilizadores.
+                </Text>
+
+                {`\n\n3. Utilização Responsável\n`}
+                <Text style={styles.modalSubTitle}>
+                  O utilizador compromete-se a usar a aplicação de forma ética e responsável.
+                </Text>
+
+                {`\n\n4. Privacidade\n`}
+                <Text style={styles.modalSubTitle}>
+                  Os dados fornecidos serão tratados com confidencialidade.
+                </Text>
+
+                {`\n\n5. Atualizações\n`}
+                <Text style={styles.modalSubTitle}>
+                  Reservamo-nos o direito de alterar estes Termos a qualquer momento.
+                </Text>
+
+                {`\n\n6. Contactos\n`}
+                <Text style={styles.modalSubTitle}>
+                  suporte@voxlink.app
+                </Text>
+
+                {`\n\nÚltima atualização: Abril de 2025.`}
+              </Text>
+
+              <TouchableOpacity style={[styles.registerButton, { marginTop: 30 }]} onPress={() => setTermsVisible(false)}>
+                <Text style={styles.registerButtonText}>Fechar</Text>
+              </TouchableOpacity>
+            </ScrollView>
+          </View>
+        </Modal>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#191919',
-  },
-  container: {
-    flex: 1,
-  },
+  safeArea: { flex: 1, backgroundColor: '#191919' },
+  container: { flex: 1 },
   scrollContainer: {
     padding: 20,
     alignItems: 'center',
@@ -173,4 +237,74 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: 'Montserrat-SemiBold',
   },
+  termsRow: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginVertical: 10,
+  },
+  termsText: {
+    color: '#fff',
+    fontFamily: 'Montserrat-Regular',
+  },
+  termsLink: {
+    color: '#fff',
+    fontFamily: 'Montserrat-Bold',
+    textDecorationLine: 'underline',
+  },
+  modalContainer: {
+    flex: 1,
+    backgroundColor: '#191919',
+  },
+  
+  modalHeader: {
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    alignItems: 'center',
+    backgroundColor: '#191919',
+    paddingTop: 10,
+    paddingHorizontal: 15,
+    paddingBottom: 10,
+    zIndex: 1,
+  },
+  
+  modalBack: {
+    color: '#fff',
+    fontSize: 28,
+    fontFamily: 'Montserrat-Bold',
+  },
+  
+  modalLogo: {
+    width: 110,
+    height: 40,
+    resizeMode: 'contain',
+  },
+  
+  modalContent: {
+    paddingHorizontal: 20,
+    paddingBottom: 40,
+  },
+  
+  modalTitle: {
+    color: '#fff',
+    fontSize: 24,
+    fontFamily: 'Montserrat-Bold',
+    textAlign: 'center',
+    marginBottom: 20,
+    marginTop: 10,
+  },
+  
+  modalText: {
+    color: '#aaa',
+    fontSize: 15,
+    fontFamily: 'Montserrat-Regular',
+    lineHeight: 26,
+    textAlign: 'justify',
+  },
+  
+  modalSubTitle: {
+    color: '#fff',
+    fontFamily: 'Montserrat-SemiBold',
+  },  
 });
