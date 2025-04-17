@@ -145,7 +145,10 @@ export default function InfoScreen() {
 
           <TouchableOpacity
             style={styles.button}
-            onPress={() => setTermsVisible(true)}
+            onPress={() => {
+              triggerHaptic(); // Vibração ao abrir o modal
+              setTermsVisible(true);
+            }}
           >
             <MaterialIcons name="description" size={22} color="#000" />
             <Text style={styles.buttonText}>Ver Termos e Condições</Text>
@@ -160,9 +163,12 @@ export default function InfoScreen() {
 
               {/* Header fixo no topo */}
               <View style={styles.modalHeader}>
-                <TouchableOpacity onPress={() => setTermsVisible(false)}>
-                  <Text style={styles.modalBack}>←</Text>
-                </TouchableOpacity>
+              <TouchableOpacity onPress={() => {
+                triggerHaptic();
+                setTermsVisible(false);
+              }}>
+                <Text style={styles.modalBack}>←</Text>
+              </TouchableOpacity>
                 <Image
                   source={require('../../assets/images/logo-header.png')}
                   style={styles.modalLogo}
@@ -208,7 +214,10 @@ export default function InfoScreen() {
 
                 <TouchableOpacity
                   style={[styles.button, { alignSelf: 'center', marginTop: 30 }]}
-                  onPress={() => setTermsVisible(false)}
+                  onPress={() => {
+                    triggerHaptic(); // Vibração ao fechar o modal
+                    setTermsVisible(false);
+                  }}
                 >
                   <Text style={styles.buttonText}>Fechar</Text>
                 </TouchableOpacity>
