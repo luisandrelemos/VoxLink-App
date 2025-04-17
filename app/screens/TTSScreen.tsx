@@ -17,7 +17,12 @@ import BottomNavBar from '../components/BottomNavBar';
 import useHaptics from '../../utils/useHaptics';
 import { useSound } from '../../context/SoundContext';
 
-const languages = [
+type LanguageOption = {
+  label: string;
+  flag: any;
+};
+
+const languages: LanguageOption[] = [
   { label: 'Português (Portugal)', flag: require('../../assets/images/flag-pt.png') },
   { label: 'English (US)', flag: require('../../assets/images/flag-en.png') },
   { label: 'Español (España)', flag: require('../../assets/images/flag-es.png') },
@@ -31,6 +36,7 @@ export default function TTSScreen() {
 
   const [selectedLang, setSelectedLang] = useState(languages[0]);
   const [modalVisible, setModalVisible] = useState(false);
+  const [selectedSpeed, setSelectedSpeed] = useState('1x');
 
   useEffect(() => {
     const loadLang = async () => {
@@ -40,12 +46,18 @@ export default function TTSScreen() {
     loadLang();
   }, []);
 
-  const handleLangChange = async (item: any) => {
+  const handleLangChange = async (item: LanguageOption) => {
     setSelectedLang(item);
     await AsyncStorage.setItem('selectedLang', JSON.stringify(item));
     triggerHaptic();
     playClick();
     setModalVisible(false);
+  };
+
+  const handleSpeedSelect = (label: string) => {
+    triggerHaptic();
+    playClick();
+    setSelectedSpeed(label);
   };
 
   return (
@@ -54,19 +66,10 @@ export default function TTSScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity
-          onPress={() => {
-            triggerHaptic();
-            playClick();
-            router.back();
-          }}
-        >
+        <TouchableOpacity onPress={() => { triggerHaptic(); playClick(); router.back(); }}>
           <Text style={styles.backText}>← Text-to-Speech</Text>
         </TouchableOpacity>
-        <Image
-          source={require('../../assets/images/logo-header.png')}
-          style={styles.logo}
-        />
+        <Image source={require('../../assets/images/logo-header.png')} style={styles.logo} />
       </View>
 
       {/* Caixa de introdução de texto */}
@@ -81,16 +84,9 @@ export default function TTSScreen() {
       </View>
 
       {/* Idioma */}
-      <View style={styles.section}>
+      <View style={styles.sectionTight}>
         <Text style={styles.label}>Idioma</Text>
-        <TouchableOpacity
-          style={styles.dropdown}
-          onPress={() => {
-            triggerHaptic();
-            playClick();
-            setModalVisible(true);
-          }}
-        >
+        <TouchableOpacity style={styles.dropdown} onPress={() => { triggerHaptic(); playClick(); setModalVisible(true); }}>
           <Image source={selectedLang.flag} style={styles.flag} />
           <Text style={styles.dropdownText}>{selectedLang.label}</Text>
           <MaterialIcons name="arrow-drop-down" size={24} color="#fff" />
@@ -101,9 +97,23 @@ export default function TTSScreen() {
       <View style={styles.section}>
         <Text style={styles.label}>Velocidade</Text>
         <View style={styles.speedOptions}>
-          {['0.5x', '0.75x', '1x', '1.25x', 'Personalizado'].map((label, idx) => (
-            <TouchableOpacity key={idx} style={styles.speedButton}>
-              <Text style={styles.speedText}>{label}</Text>
+          {['0.5x', '0.75x', '1x', '1.25x', '+'].map((label, idx) => (
+            <TouchableOpacity
+              key={idx}
+              style={[
+                styles.speedButton,
+                selectedSpeed === label && styles.speedButtonActive
+              ]}
+              onPress={() => handleSpeedSelect(label)}
+            >
+              <Text
+                style={[
+                  styles.speedText,
+                  selectedSpeed === label && styles.speedTextActive
+                ]}
+              >
+                {label}
+              </Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -172,16 +182,23 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat-Regular',
     color: '#000',
     flex: 1,
+    textAlignVertical: 'top',
+    textAlign: 'left',
   },
   section: {
-    marginTop: 25,
+    marginTop: 45,
+    marginHorizontal: 20,
+  },
+  sectionTight: {
+    marginTop: 55,
+    marginBottom: -20,
     marginHorizontal: 20,
   },
   label: {
     color: '#fff',
-    fontFamily: 'Montserrat-Bold',
+    fontFamily: 'Montserrat-SemiBold',
     marginBottom: 8,
-    fontSize: 14,
+    fontSize: 16,
   },
   dropdown: {
     borderWidth: 1,
@@ -195,40 +212,57 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontFamily: 'Montserrat-Regular',
     fontSize: 14,
+    flex: 1,
+    marginLeft: 10,
   },
   flag: {
     width: 22,
     height: 15,
     resizeMode: 'contain',
-    marginRight: 10,
   },
   speedOptions: {
     flexDirection: 'row',
-    justifyContent: 'space-between',
+    justifyContent: 'center',
+    alignItems: 'center',
     marginTop: 8,
+    gap: 4, 
+    flexWrap: 'nowrap',
   },
   speedButton: {
-    backgroundColor: '#2a2a2a',
-    paddingHorizontal: 10,
-    paddingVertical: 6,
-    borderRadius: 8,
+    borderWidth: 2,
+    borderColor: '#fff',
+    backgroundColor: 'transparent',
+    paddingHorizontal: 14,
+    paddingVertical: 8,
+    borderRadius: 20,
+    minWidth: 60,
+    alignItems: 'center',
+  },
+  speedButtonActive: {
+    backgroundColor: '#fff',
   },
   speedText: {
     color: '#fff',
-    fontFamily: 'Montserrat-Regular',
-    fontSize: 13,
+    fontFamily: 'Montserrat-SemiBold',
+    fontSize: 12,
   },
+  
+  speedTextActive: {
+    color: '#000',
+    fontFamily: 'Montserrat-Bold',
+  },
+    
   convertButton: {
     backgroundColor: '#fff',
     marginTop: 30,
     marginHorizontal: 20,
     padding: 14,
-    borderRadius: 12,
+    borderRadius: 15,
     alignItems: 'center',
   },
   convertText: {
     fontFamily: 'Montserrat-Bold',
-    fontSize: 16,
+    fontSize: 20,
     color: '#000',
   },
   modalOverlay: {
@@ -262,6 +296,7 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 14,
     fontFamily: 'Montserrat-Regular',
+    marginLeft: 10,
   },
   selected: {
     backgroundColor: '#3c3c3c',
