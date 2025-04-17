@@ -8,7 +8,7 @@ import { useRouter } from 'expo-router';
 import BottomNavBar from '../components/BottomNavBar';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import useHaptics from '../../utils/useHaptics';
-import useClickSound from '../../utils/useClickSound';
+import { useSound } from '../../context/SoundContext';
 
 // Dados
 const languages = [
@@ -69,8 +69,8 @@ export default function SettingsScreen() {
   }, []);
 
   const triggerHaptic = useHaptics();
-  const triggerSound = useClickSound();
-
+  const { playClick } = useSound();
+  
   const handleFontSizeChange = async (value: number) => {
     setFontSizeValue(value);
     await AsyncStorage.setItem('fontSizeValue', value.toString());
@@ -82,7 +82,7 @@ export default function SettingsScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => { router.push('/home'); triggerHaptic(); triggerSound();}}>
+        <TouchableOpacity onPress={() => { router.push('/home'); triggerHaptic(); playClick();}}>
           <Text style={styles.backText}>← Definições</Text>
         </TouchableOpacity>
         <Image source={require('../../assets/images/logo-header.png')} style={styles.logo} />
@@ -93,7 +93,7 @@ export default function SettingsScreen() {
 
         {/* Idioma */}
         <Text style={styles.label}>Idioma</Text>
-        <TouchableOpacity style={styles.dropdown} onPress={() => { setLangModalVisible(true); triggerHaptic(); triggerSound();}}>
+        <TouchableOpacity style={styles.dropdown} onPress={() => { setLangModalVisible(true); triggerHaptic(); playClick();}}>
           <Image source={selectedLang.flag} style={styles.flag} />
           <Text style={styles.dropdownText}>{selectedLang.label}</Text>
         </TouchableOpacity>
@@ -113,7 +113,7 @@ export default function SettingsScreen() {
                       await AsyncStorage.setItem('selectedLang', JSON.stringify(item));
                       setLangModalVisible(false);
                       triggerHaptic();
-                      triggerSound();
+                      playClick();
                     }}
                   >
                     <Image source={item.flag} style={styles.flag} />
@@ -137,7 +137,7 @@ export default function SettingsScreen() {
               const rounded = Math.round(value * 2) / 2;
               handleFontSizeChange(rounded);
               triggerHaptic();
-              triggerSound();
+              playClick();
             }}
             minimumTrackTintColor="#fff"
             maximumTrackTintColor="#444"
@@ -150,7 +150,7 @@ export default function SettingsScreen() {
 
         {/* Tema */}
         <Text style={styles.label}>Tema Alto Contraste</Text>
-        <TouchableOpacity style={styles.dropdown} onPress={() => { setThemeModalVisible(true); triggerHaptic(); triggerSound();}}>
+        <TouchableOpacity style={styles.dropdown} onPress={() => { setThemeModalVisible(true); triggerHaptic(); playClick();}}>
           <Image source={selectedTheme.icon} style={styles.optionIcon} />
           <Text style={styles.dropdownText}>{selectedTheme.label}</Text>
         </TouchableOpacity>
@@ -170,7 +170,7 @@ export default function SettingsScreen() {
                       await AsyncStorage.setItem('selectedTheme', JSON.stringify(item));
                       setThemeModalVisible(false);
                       triggerHaptic();
-                      triggerSound();
+                      playClick();
                     }}
                   >
                     <Image source={item.icon} style={styles.optionIcon} />
@@ -184,7 +184,7 @@ export default function SettingsScreen() {
 
         {/* Tipo de Utilizador */}
         <Text style={styles.label}>Tipo de Utilizador</Text>
-        <TouchableOpacity style={styles.dropdown} onPress={() => { setUserTypeModalVisible(true); triggerHaptic(); triggerSound();}}>
+        <TouchableOpacity style={styles.dropdown} onPress={() => { setUserTypeModalVisible(true); triggerHaptic(); playClick();}}>
           <Image source={selectedUserType.icon} style={styles.optionIcon} />
           <Text style={styles.dropdownText}>{selectedUserType.label}</Text>
         </TouchableOpacity>
@@ -204,7 +204,7 @@ export default function SettingsScreen() {
                       await AsyncStorage.setItem('selectedUserType', JSON.stringify(item));
                       setUserTypeModalVisible(false);
                       triggerHaptic();
-                      triggerSound();
+                      playClick();
                     }}
                   >
                     <Image source={item.icon} style={styles.optionIcon} />
@@ -233,7 +233,7 @@ export default function SettingsScreen() {
                 item.setter(val);
                 await AsyncStorage.setItem(item.key, JSON.stringify(val));
                 triggerHaptic();
-                triggerSound();
+                playClick();
               }}
               trackColor={{ false: '#444', true: '#fff' }}
               thumbColor="#fff"

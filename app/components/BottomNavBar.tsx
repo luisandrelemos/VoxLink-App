@@ -1,13 +1,13 @@
 import { View, Image, StyleSheet, TouchableOpacity } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
 import useHaptics from '../../utils/useHaptics';
-import useClickSound from '../../utils/useClickSound';
+import { useSound } from '../../context/SoundContext';
 
 export default function BottomNavBar() {
   const router = useRouter();
   const pathname = usePathname();
   const triggerHaptic = useHaptics();
-  const triggerSound = useClickSound();
+  const { playClick } = useSound();
 
   const isActive = (path: string) => pathname === path;
 
@@ -18,7 +18,7 @@ export default function BottomNavBar() {
         onPress={() => {
           if (!isActive('/home')) {
             triggerHaptic();
-            triggerSound();
+            playClick();
             router.replace('/home');
           }
         }}
@@ -37,7 +37,7 @@ export default function BottomNavBar() {
         onPress={() => {
           if (!isActive('/account')) {
             triggerHaptic();
-            triggerSound();
+            playClick();
             router.replace('/account');
           }
         }}
@@ -62,7 +62,7 @@ export default function BottomNavBar() {
         onPress={() => {
           if (!isActive('/settings')) {
             triggerHaptic();
-            triggerSound();
+            playClick();
             router.replace('/settings');
           }
         }}
@@ -81,7 +81,7 @@ export default function BottomNavBar() {
         onPress={() => {
           if (!isActive('/info')) {
             triggerHaptic();
-            triggerSound();
+            playClick();
             router.replace('/info');
           }
         }}

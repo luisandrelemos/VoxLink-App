@@ -8,6 +8,7 @@ import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
 import { auth } from '../../utils/firebaseConfig';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import useHaptics from '../../utils/useHaptics';
 
 export default function LoginScreen() {
   const [email, setEmail] = useState('');
@@ -15,6 +16,7 @@ export default function LoginScreen() {
   const [stayConnected, setStayConnected] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const router = useRouter();
+  const triggerHaptic = useHaptics();
 
   // Verificar se o utilizador quer ficar conectado
   useEffect(() => {
@@ -92,19 +94,30 @@ export default function LoginScreen() {
             <Text style={styles.stayConnectedText}>Ficar Conectado</Text>
             <Switch
               value={stayConnected}
-              onValueChange={setStayConnected}
+              onValueChange={(val) => {
+                setStayConnected(val);
+                triggerHaptic();
+              }}
               thumbColor="#fff"
               trackColor={{ false: '#888', true: '#444' }}
             />
           </View>
 
           {/* Botão Entrar Email/Password */}
-          <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+          <TouchableOpacity
+            style={styles.loginButton}
+            onPress={() => {
+              triggerHaptic();
+              handleLogin();
+            }}
+          >
             <Text style={styles.loginButtonText}>Entrar</Text>
           </TouchableOpacity>
 
           {/* Esqueceu Password */}
-          <TouchableOpacity>
+          <TouchableOpacity onPress={() => {
+            triggerHaptic();
+          }}>
             <Text style={styles.forgotPassword}>Esqueceu-se da Password?</Text>
           </TouchableOpacity>
 
@@ -118,7 +131,9 @@ export default function LoginScreen() {
           {/* Botões de Login Social */}
           <View style={styles.socialButtons}>
             {/* Google (inativo, só visual) */}
-            <TouchableOpacity style={styles.socialButton}>
+            <TouchableOpacity style={styles.socialButton} onPress={() => {
+              triggerHaptic();
+            }}>
               <Image
                 source={require('../../assets/images/google-icon.png')}
                 style={styles.icon}

@@ -8,12 +8,14 @@ import * as ImagePicker from 'expo-image-picker';
 import { getAuth, signOut, updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import { useRouter } from 'expo-router';
 import useHaptics from '../../utils/useHaptics';
+import { useSound } from '../../context/SoundContext';
 
 export default function ProfileScreen() {
   const router = useRouter();
   const auth = getAuth();
   const currentUser = auth.currentUser;
   const triggerHaptic = useHaptics();
+  const { playClick } = useSound();
 
   const [user, setUser] = useState<{ name?: string; email: string; photoURL?: string } | null>(null);
   const [isModalVisible, setModalVisible] = useState(false);
@@ -96,7 +98,7 @@ export default function ProfileScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => { router.push('/home'); triggerHaptic(); }}>
+        <TouchableOpacity onPress={() => { router.push('/home'); triggerHaptic(); playClick();}}>
           <Text style={styles.backText}>← Minha Conta</Text>
         </TouchableOpacity>
         <Image source={require('../../assets/images/logo-header.png')} style={styles.logo} />
@@ -117,15 +119,15 @@ export default function ProfileScreen() {
         <Text style={styles.name}>{user?.name}</Text>
         <Text style={styles.email}>{user?.email}</Text>
 
-        <TouchableOpacity style={styles.buttonOutline} onPress={() => { setModalVisible(true); triggerHaptic(); }}>
+        <TouchableOpacity style={styles.buttonOutline} onPress={() => { setModalVisible(true); triggerHaptic(); playClick();}}>
           <Text style={styles.buttonOutlineText}>Editar Perfil</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.buttonOutline} onPress={triggerHaptic}>
+        <TouchableOpacity style={styles.buttonOutline} onPress={() => { router.push; triggerHaptic(); playClick();}}>
           <Text style={styles.buttonOutlineText}>Preferências</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.buttonSolid} onPress={() => { handleLogout(); triggerHaptic(); }}>
+        <TouchableOpacity style={styles.buttonSolid} onPress={() => { handleLogout(); triggerHaptic(); playClick();}}>
           <Text style={styles.buttonSolidText}>Terminar Sessão</Text>
         </TouchableOpacity>
       </View>
@@ -136,7 +138,7 @@ export default function ProfileScreen() {
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Editar Perfil</Text>
 
-            <TouchableOpacity onPress={() => { pickImage(); triggerHaptic(); }}>
+            <TouchableOpacity onPress={() => { pickImage(); triggerHaptic(); playClick();}}>
               <Image
                 source={
                   imageUri
@@ -176,11 +178,11 @@ export default function ProfileScreen() {
               onChangeText={setNewPassword}
             />
 
-            <TouchableOpacity style={styles.buttonSolid} onPress={() => { handleSaveChanges(); triggerHaptic(); }}>
+            <TouchableOpacity style={styles.buttonSolid} onPress={() => { handleSaveChanges(); triggerHaptic(); playClick();}}>
               <Text style={styles.buttonSolidText}>Guardar</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => { setModalVisible(false); triggerHaptic(); }} style={{ marginTop: 15 }}>
+            <TouchableOpacity onPress={() => { setModalVisible(false); triggerHaptic(); playClick();}} style={{ marginTop: 15 }}>
               <Text style={{ color: '#fff', fontFamily: 'Montserrat-Regular' }}>Cancelar</Text>
             </TouchableOpacity>
           </View>
