@@ -39,6 +39,7 @@ export default function SettingsScreen() {
   const [themeModalVisible, setThemeModalVisible] = useState(false);
   const [userTypeModalVisible, setUserTypeModalVisible] = useState(false);
 
+  const [sliderInteracted, setSliderInteracted] = useState(false);
   const [fontSizeValue, setFontSizeValue] = useState(0.5);
   const [notifications, setNotifications] = useState(false);
   const [hapticFeedback, setHapticFeedback] = useState(false);
@@ -132,7 +133,11 @@ export default function SettingsScreen() {
             value={fontSizeValue}
             onValueChange={(value) => {
               handleFontSizeChange(value);
-              triggerHaptic();
+              if (sliderInteracted) {
+                triggerHaptic();
+              } else {
+                setSliderInteracted(true);
+              }
             }}
             minimumTrackTintColor="#fff"
             maximumTrackTintColor="#444"
