@@ -134,7 +134,7 @@ export default function SettingsScreen() {
             maximumValue={1}
             value={fontSizeValue}
             onSlidingComplete={(value) => {
-              const rounded = Math.round(value * 2) / 2; // arredonda para 0, 0.5 ou 1
+              const rounded = Math.round(value * 2) / 2;
               handleFontSizeChange(rounded);
               triggerHaptic();
               triggerSound();
