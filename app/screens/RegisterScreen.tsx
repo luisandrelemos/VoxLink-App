@@ -7,6 +7,7 @@ import { Entypo } from '@expo/vector-icons';
 import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
 import { auth } from '../../utils/firebaseConfig';
 import { useRouter } from 'expo-router';
+import useHaptics from '../../utils/useHaptics';
 
 export default function RegisterScreen() {
   const [name, setName] = useState('');
@@ -19,6 +20,7 @@ export default function RegisterScreen() {
   const [termsVisible, setTermsVisible] = useState(false);
 
   const router = useRouter();
+  const triggerHaptic = useHaptics();
 
   async function handleRegister() {
     if (!acceptedTerms) {
@@ -52,6 +54,7 @@ export default function RegisterScreen() {
           <Text style={styles.title}>És Novo? Cria uma Conta!</Text>
 
           <TextInput
+            onFocus={triggerHaptic}
             style={styles.input}
             placeholder="Nome"
             placeholderTextColor="#000"
@@ -59,6 +62,7 @@ export default function RegisterScreen() {
             onChangeText={setName}
           />
           <TextInput
+            onFocus={triggerHaptic}
             style={styles.input}
             placeholder="Email"
             placeholderTextColor="#000"
@@ -69,6 +73,7 @@ export default function RegisterScreen() {
 
           <View style={styles.passwordContainer}>
             <TextInput
+              onFocus={triggerHaptic}
               style={styles.inputPassword}
               placeholder="Password"
               placeholderTextColor="#000"
@@ -76,13 +81,19 @@ export default function RegisterScreen() {
               value={password}
               onChangeText={setPassword}
             />
-            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
+            <TouchableOpacity
+              onPress={() => {
+                setShowPassword(!showPassword);
+                triggerHaptic();
+              }}
+            >
               <Entypo name={showPassword ? 'eye-with-line' : 'eye'} size={22} color="#888" />
             </TouchableOpacity>
           </View>
 
           <View style={styles.passwordContainer}>
             <TextInput
+              onFocus={triggerHaptic}
               style={styles.inputPassword}
               placeholder="Confirmação Password"
               placeholderTextColor="#000"
@@ -90,8 +101,13 @@ export default function RegisterScreen() {
               value={confirmPassword}
               onChangeText={setConfirmPassword}
             />
-            <TouchableOpacity onPress={() => setShowConfirmPassword(!showConfirmPassword)}>
-              <Entypo name={showConfirmPassword ? 'eye-with-line' : 'eye'} size={22} color="#888" />
+            <TouchableOpacity
+              onPress={() => {
+                setShowConfirmPassword(!showConfirmPassword );
+                triggerHaptic();
+              }}
+            >
+              <Entypo name={showConfirmPassword  ? 'eye-with-line' : 'eye'} size={22} color="#888" />
             </TouchableOpacity>
           </View>
 
@@ -99,18 +115,32 @@ export default function RegisterScreen() {
           <View style={styles.termsRow}>
             <Switch
               value={acceptedTerms}
-              onValueChange={setAcceptedTerms}
+              onValueChange={(val) => {
+                setAcceptedTerms(val);
+                triggerHaptic();
+              }}
               trackColor={{ false: '#555', true: '#ccc' }}
               thumbColor={acceptedTerms ? '#fff' : '#888'}
             />
-            <TouchableOpacity onPress={() => setTermsVisible(true)}>
+            <TouchableOpacity
+              onPress={() => {
+                setTermsVisible(true);
+                triggerHaptic();
+              }}
+            >
               <Text style={styles.termsText}>
                 Aceito os <Text style={styles.termsLink}>Termos e Condições</Text>
               </Text>
             </TouchableOpacity>
           </View>
 
-          <TouchableOpacity style={styles.registerButton} onPress={handleRegister}>
+          <TouchableOpacity
+            style={styles.registerButton}
+            onPress={() => {
+              triggerHaptic();
+              handleRegister();
+            }}
+          >
             <Text style={styles.registerButtonText}>Criar Conta</Text>
           </TouchableOpacity>
 
@@ -121,7 +151,12 @@ export default function RegisterScreen() {
         <Modal visible={termsVisible} animationType="slide" onRequestClose={() => setTermsVisible(false)}>
           <View style={styles.modalContainer}>
             <View style={styles.modalHeader}>
-              <TouchableOpacity onPress={() => setTermsVisible(false)}>
+              <TouchableOpacity
+                onPress={() => {
+                  triggerHaptic();
+                  setTermsVisible(false);
+                }}
+              >
                 <Text style={styles.modalBack}>←</Text>
               </TouchableOpacity>
               <Image source={require('../../assets/images/logo-header.png')} style={styles.modalLogo} />
@@ -162,7 +197,13 @@ export default function RegisterScreen() {
                 {`\n\nÚltima atualização: Abril de 2025.`}
               </Text>
 
-              <TouchableOpacity style={[styles.registerButton, { marginTop: 30 }]} onPress={() => setTermsVisible(false)}>
+              <TouchableOpacity
+                style={[styles.registerButton, { marginTop: 30 }]}
+                onPress={() => {
+                  triggerHaptic();
+                  setTermsVisible(false);
+                }}
+              >
                 <Text style={styles.registerButtonText}>Fechar</Text>
               </TouchableOpacity>
             </ScrollView>

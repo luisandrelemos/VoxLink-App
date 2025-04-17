@@ -62,6 +62,7 @@ export default function LoginScreen() {
 
           {/* Campo Email */}
           <TextInput
+            onFocus={triggerHaptic}
             style={styles.input}
             placeholder="Email"
             placeholderTextColor="#000"
@@ -73,6 +74,7 @@ export default function LoginScreen() {
           {/* Campo Password */}
           <View style={styles.passwordContainer}>
             <TextInput
+              onFocus={triggerHaptic}
               style={styles.inputPassword}
               placeholder="Password"
               placeholderTextColor="#000"
@@ -80,12 +82,13 @@ export default function LoginScreen() {
               value={password}
               onChangeText={setPassword}
             />
-            <TouchableOpacity onPress={() => setShowPassword(!showPassword)}>
-              <Entypo
-                name={showPassword ? 'eye-with-line' : 'eye'}
-                size={22}
-                color="#888"
-              />
+            <TouchableOpacity
+              onPress={() => {
+                setShowPassword(!showPassword);
+                triggerHaptic();
+              }}
+            >
+              <Entypo name={showPassword ? 'eye-with-line' : 'eye'} size={22} color="#888" />
             </TouchableOpacity>
           </View>
 
@@ -142,7 +145,9 @@ export default function LoginScreen() {
             </TouchableOpacity>
 
             {/* Facebook (inativo) */}
-            <TouchableOpacity style={styles.socialButton}>
+            <TouchableOpacity style={styles.socialButton} onPress={() => {
+              triggerHaptic();
+            }}>
               <Image
                 source={require('../../assets/images/facebook-icon.png')}
                 style={styles.icon}
