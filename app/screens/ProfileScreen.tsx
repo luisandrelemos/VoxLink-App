@@ -153,7 +153,7 @@ export default function ProfileScreen() {
             <TextInput
               style={styles.input}
               placeholder="Novo nome"
-              placeholderTextColor="#aaa"
+              placeholderTextColor="#000"
               value={newName}
               onChangeText={setNewName}
             />
@@ -161,7 +161,7 @@ export default function ProfileScreen() {
             <TextInput
               style={styles.input}
               placeholder="Password atual"
-              placeholderTextColor="#aaa"
+              placeholderTextColor="#000"
               secureTextEntry
               value={currentPassword}
               onChangeText={setCurrentPassword}
@@ -170,7 +170,7 @@ export default function ProfileScreen() {
             <TextInput
               style={styles.input}
               placeholder="Nova password"
-              placeholderTextColor="#aaa"
+              placeholderTextColor="#000"
               secureTextEntry
               value={newPassword}
               onChangeText={setNewPassword}
