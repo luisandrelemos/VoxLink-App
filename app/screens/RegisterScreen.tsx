@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat-Bold',
   },
   footerText: {
-    marginTop: 80,
+    marginTop: 30,
     color: '#fff',
     fontSize: 24,
     fontFamily: 'Montserrat-SemiBold',
