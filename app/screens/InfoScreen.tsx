@@ -8,7 +8,7 @@ import BottomNavBar from '../components/BottomNavBar';
 import { useRouter } from 'expo-router';
 import useHaptics from '../../utils/useHaptics';
 import { MaterialIcons } from '@expo/vector-icons';
-import useClickSound from '../../utils/useClickSound';
+import { useSound } from '../../context/SoundContext';
 
 const { width, height } = Dimensions.get('window');
 
@@ -20,7 +20,7 @@ if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental
 export default function InfoScreen() {
   const router = useRouter();
   const triggerHaptic = useHaptics();
-  const triggerSound = useClickSound();
+  const { playClick } = useSound();
   const [faqOpen, setFaqOpen] = useState<number | null>(null);
   const [termsVisible, setTermsVisible] = useState(false);
 
@@ -28,7 +28,7 @@ export default function InfoScreen() {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
     setFaqOpen(faqOpen === index ? null : index);
     triggerHaptic();
-    triggerSound();
+    playClick();
   };
 
   const faqs = [
@@ -52,7 +52,7 @@ export default function InfoScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => { router.push('/home'); triggerHaptic(); triggerSound();}}>
+        <TouchableOpacity onPress={() => { router.push('/home'); triggerHaptic(); playClick();}}>
           <Text style={styles.backText}>← Informações</Text>
         </TouchableOpacity>
         <Image source={require('../../assets/images/logo-header.png')} style={styles.logo} />
@@ -91,7 +91,7 @@ export default function InfoScreen() {
           <Text style={styles.description}>
             Ajustes de tema, texto, feedback tátil e muito mais para melhorar a usabilidade para todos os utilizadores.
           </Text>
-          <TouchableOpacity style={styles.button} onPress={() => { router.push('/settings'); triggerHaptic(); triggerSound();}}>
+          <TouchableOpacity style={styles.button} onPress={() => { router.push('/settings'); triggerHaptic(); playClick();}}>
             <MaterialIcons name="settings-accessibility" size={22} color="#000" />
             <Text style={styles.buttonText}>Ir para Definições</Text>
           </TouchableOpacity>
@@ -153,7 +153,7 @@ export default function InfoScreen() {
             style={styles.button}
             onPress={() => {
               triggerHaptic();
-              triggerSound();
+              playClick();
               setTermsVisible(true);
             }}
           >
@@ -172,7 +172,7 @@ export default function InfoScreen() {
               <View style={styles.modalHeader}>
               <TouchableOpacity onPress={() => {
                 triggerHaptic();
-                triggerSound();
+                playClick();
                 setTermsVisible(false);
               }}>
                 <Text style={styles.modalBack}>←</Text>
@@ -224,7 +224,7 @@ export default function InfoScreen() {
                   style={[styles.button, { alignSelf: 'center', marginTop: 30 }]}
                   onPress={() => {
                     triggerHaptic();
-                    triggerSound();
+                    playClick();
                     setTermsVisible(false);
                   }}
                 >
