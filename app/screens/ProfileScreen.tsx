@@ -7,11 +7,13 @@ import BottomNavBar from '../components/BottomNavBar';
 import * as ImagePicker from 'expo-image-picker';
 import { getAuth, signOut, updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
 import { useRouter } from 'expo-router';
+import useHaptics from '../../utils/useHaptics';
 
 export default function ProfileScreen() {
   const router = useRouter();
   const auth = getAuth();
   const currentUser = auth.currentUser;
+  const triggerHaptic = useHaptics();
 
   const [user, setUser] = useState<{ name?: string; email: string; photoURL?: string } | null>(null);
   const [isModalVisible, setModalVisible] = useState(false);
@@ -48,7 +50,6 @@ export default function ProfileScreen() {
     try {
       if (!currentUser) return;
 
-      // Atualização do nome ou imagem
       if (newName || imageUri) {
         await updateProfile(currentUser, {
           displayName: newName || currentUser.displayName,
@@ -56,7 +57,6 @@ export default function ProfileScreen() {
         });
       }
 
-      // Se for para alterar a password
       if (newPassword) {
         if (!currentPassword) {
           Alert.alert('Erro', 'Introduz a tua password atual para confirmar.');
@@ -96,7 +96,7 @@ export default function ProfileScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => router.push('/home')}>
+        <TouchableOpacity onPress={() => { router.push('/home'); triggerHaptic(); }}>
           <Text style={styles.backText}>← Minha Conta</Text>
         </TouchableOpacity>
         <Image source={require('../../assets/images/logo-header.png')} style={styles.logo} />
@@ -109,23 +109,23 @@ export default function ProfileScreen() {
             imageUri
               ? { uri: imageUri }
               : user?.photoURL
-                ? { uri: user.photoURL }
-                : require('../../assets/images/profile-placeholder.png')
+              ? { uri: user.photoURL }
+              : require('../../assets/images/profile-placeholder.png')
           }
           style={styles.avatar}
         />
         <Text style={styles.name}>{user?.name}</Text>
         <Text style={styles.email}>{user?.email}</Text>
 
-        <TouchableOpacity style={styles.buttonOutline} onPress={() => setModalVisible(true)}>
+        <TouchableOpacity style={styles.buttonOutline} onPress={() => { setModalVisible(true); triggerHaptic(); }}>
           <Text style={styles.buttonOutlineText}>Editar Perfil</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.buttonOutline}>
+        <TouchableOpacity style={styles.buttonOutline} onPress={triggerHaptic}>
           <Text style={styles.buttonOutlineText}>Preferências</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.buttonSolid} onPress={handleLogout}>
+        <TouchableOpacity style={styles.buttonSolid} onPress={() => { handleLogout(); triggerHaptic(); }}>
           <Text style={styles.buttonSolidText}>Terminar Sessão</Text>
         </TouchableOpacity>
       </View>
@@ -136,14 +136,14 @@ export default function ProfileScreen() {
           <View style={styles.modalContent}>
             <Text style={styles.modalTitle}>Editar Perfil</Text>
 
-            <TouchableOpacity onPress={pickImage}>
+            <TouchableOpacity onPress={() => { pickImage(); triggerHaptic(); }}>
               <Image
                 source={
                   imageUri
                     ? { uri: imageUri }
                     : user?.photoURL
-                      ? { uri: user.photoURL }
-                      : require('../../assets/images/profile-placeholder.png')
+                    ? { uri: user.photoURL }
+                    : require('../../assets/images/profile-placeholder.png')
                 }
                 style={styles.avatar}
               />
@@ -176,11 +176,11 @@ export default function ProfileScreen() {
               onChangeText={setNewPassword}
             />
 
-            <TouchableOpacity style={styles.buttonSolid} onPress={handleSaveChanges}>
+            <TouchableOpacity style={styles.buttonSolid} onPress={() => { handleSaveChanges(); triggerHaptic(); }}>
               <Text style={styles.buttonSolidText}>Guardar</Text>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => setModalVisible(false)} style={{ marginTop: 15 }}>
+            <TouchableOpacity onPress={() => { setModalVisible(false); triggerHaptic(); }} style={{ marginTop: 15 }}>
               <Text style={{ color: '#fff', fontFamily: 'Montserrat-Regular' }}>Cancelar</Text>
             </TouchableOpacity>
           </View>
