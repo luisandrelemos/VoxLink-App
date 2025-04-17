@@ -1,13 +1,21 @@
-import { View, Text, Image, TouchableOpacity, StyleSheet, ScrollView, Dimensions, StatusBar } from 'react-native';
+import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions, StatusBar } from 'react-native';
 import { useRouter } from 'expo-router';
-import { useState } from 'react';
 import BottomNavBar from '../components/BottomNavBar';
+import useHaptics from '../../utils/useHaptics';
+import { useSound } from '../../context/SoundContext';
 
 const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
   const router = useRouter();
-  const [activePage, setActivePage] = useState('home');
+  const triggerHaptic = useHaptics();
+  const { playClick } = useSound();
+
+  const handlePress = (callback: () => void) => {
+    triggerHaptic();
+    playClick();
+    callback();
+  };
 
   return (
     <View style={styles.container}>
@@ -18,31 +26,31 @@ export default function HomeScreen() {
         <Image source={require('../../assets/images/logo-header.png')} style={styles.logo} />
 
         {/* Bloco: Speech-to-Text */}
-        <TouchableOpacity style={styles.block}>
+        <TouchableOpacity style={styles.block} onPress={() => handlePress(() => router.push('/stt'))}>
           <Image source={require('../../assets/images/stt-icon.png')} style={styles.blockImage} />
           <Text style={styles.blockLabel}>Speech-to-Text</Text>
         </TouchableOpacity>
 
         {/* Bloco: Text-to-Speech */}
-        <TouchableOpacity style={styles.block}>
+        <TouchableOpacity style={styles.block} onPress={() => handlePress(() => router.push('/tts'))}>
           <Image source={require('../../assets/images/tts-icon.png')} style={styles.blockImage} />
           <Text style={styles.blockLabel}>Text-to-Speech</Text>
         </TouchableOpacity>
 
         {/* Bloco: Comunicação Rápida */}
-        <TouchableOpacity style={styles.block}>
+        <TouchableOpacity style={styles.block} onPress={() => handlePress(() => router.push('/fasttext'))}>
           <Image source={require('../../assets/images/list-icon.png')} style={styles.blockImage} />
           <Text style={styles.blockLabel}>Comunicação Rápida</Text>
         </TouchableOpacity>
 
         {/* Bloco: Acessibilidade */}
-        <TouchableOpacity style={styles.block}>
+        <TouchableOpacity style={styles.block} onPress={() => handlePress(() => router.push('/settings'))}>
           <Image source={require('../../assets/images/accessibility-icon.png')} style={styles.blockImage} />
           <Text style={styles.blockLabel}>Acessibilidade</Text>
         </TouchableOpacity>
       </View>
 
-      <BottomNavBar/>
+      <BottomNavBar />
     </View>
   );
 }
@@ -73,7 +81,7 @@ const styles = StyleSheet.create({
     width: 300,
     height: 120,
     resizeMode: 'contain',
-    alignSelf: 'center', 
+    alignSelf: 'center',
   },
   blockLabel: {
     color: '#fff',
@@ -82,5 +90,5 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat-SemiBold',
     textAlign: 'left',
     alignSelf: 'flex-start',
-  }
+  },
 });
