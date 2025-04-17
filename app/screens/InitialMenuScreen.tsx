@@ -1,12 +1,14 @@
 import React from 'react';
 import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, StatusBar } from 'react-native';
 import { useRouter } from 'expo-router';
+import useHaptics from '../../utils/useHaptics';
 
 export default function InitialMenuScreen() {
   const router = useRouter();
+  const triggerHaptic = useHaptics();
 
   const handleGoogleLogin = () => {
-    // Aqui depois vamos configurar o login Google
+    triggerHaptic();
     alert('Login com Google ainda não implementado');
   };
 
@@ -17,21 +19,39 @@ export default function InitialMenuScreen() {
       <Image source={require('../../assets/images/logo.png')} style={styles.logo} />
       <Text style={styles.title}>VoxLink</Text>
 
-      <TouchableOpacity style={styles.buttonOutline} onPress={() => router.push('/register')}>
+      <TouchableOpacity
+        style={styles.buttonOutline}
+        onPress={() => {
+          triggerHaptic();
+          router.push('/register');
+        }}
+      >
         <Text style={styles.buttonOutlineText}>Criar Conta</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.socialButton}>
+      <TouchableOpacity style={styles.socialButton} onPress={handleGoogleLogin}>
         <Image source={require('../../assets/images/google-icon.png')} style={styles.icon} />
         <Text style={styles.socialText}>Entrar Com Google</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.socialButton}>
+      <TouchableOpacity
+        style={styles.socialButton}
+        onPress={() => {
+          triggerHaptic();
+          alert('Login com Facebook ainda não implementado');
+        }}
+      >
         <Image source={require('../../assets/images/facebook-icon.png')} style={styles.icon} />
         <Text style={styles.socialText}>Entrar Com Facebook</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity style={styles.loginButton} onPress={() => router.push('/login')}>
+      <TouchableOpacity
+        style={styles.loginButton}
+        onPress={() => {
+          triggerHaptic();
+          router.push('/login');
+        }}
+      >
         <Text style={styles.loginText}>Login</Text>
       </TouchableOpacity>
     </View>
