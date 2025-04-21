@@ -1,4 +1,4 @@
-/* app/TTSScreen.tsx (rev.) */
+/* app/TTSScreen.tsx */
 import React, { useEffect, useState } from 'react';
 import {
   View,
