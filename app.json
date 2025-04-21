@@ -41,6 +41,7 @@
       "typedRoutes": true
     },
     "extra": {
+      "googleTtsKey": "***Paste API Here***",
       "router": {
         "origin": false
       },
