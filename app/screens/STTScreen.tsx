@@ -162,7 +162,7 @@ export default function STTScreen() {
 
       <View style={styles.header}>
         <TouchableOpacity onPress={() => { triggerHaptic(); playClick(); router.back(); }}>
-          <Text style={styles.backText}>← Speech-to-Text</Text>
+          <Text style={styles.backText}>← Voz-para-Texto</Text>
         </TouchableOpacity>
         <Image source={require('../../assets/images/logo-header.png')} style={styles.logo} />
       </View>
