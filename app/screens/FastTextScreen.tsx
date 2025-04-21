@@ -1,4 +1,4 @@
-/* app/screens/FastTextScreen.tsx */
+/* app/screens/FastTextScreen.tsx*/
 import React, { useState } from 'react';
 import {
   View,
