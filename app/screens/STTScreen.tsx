@@ -1,4 +1,5 @@
-import React, { useEffect, useState } from 'react';
+// app/STTScreen.tsx
+import React, { useEffect, useState, useRef } from 'react';
 import {
   View,
   Text,
@@ -11,6 +12,8 @@ import {
   FlatList,
   ActivityIndicator,
   Alert,
+  Animated,
+  Easing,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
@@ -19,7 +22,9 @@ import BottomNavBar from '../components/BottomNavBar';
 import useHaptics from '../../utils/useHaptics';
 import { useSound } from '../../context/SoundContext';
 import { Audio } from 'expo-av';
+import * as Clipboard from 'expo-clipboard';
 import { transcribeAudio } from '../../utils/googleSTT';
+import { translateText } from '../../utils/googleTranslate';
 import { Recording } from 'expo-av/build/Audio/Recording';
 
 const languages = [
@@ -39,6 +44,33 @@ export default function STTScreen() {
   const [recording, setRecording] = useState<Recording | null>(null);
   const [transcription, setTranscription] = useState('');
   const [loading, setLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  const startPulse = () => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 1.1,
+          duration: 700,
+          useNativeDriver: true,
+          easing: Easing.inOut(Easing.ease),
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 700,
+          useNativeDriver: true,
+          easing: Easing.inOut(Easing.ease),
+        }),
+      ])
+    ).start();
+  };
+
+  const stopPulse = () => {
+    pulseAnim.stopAnimation();
+    pulseAnim.setValue(1);
+  };
 
   useEffect(() => {
     const loadLang = async () => {
@@ -73,6 +105,7 @@ export default function STTScreen() {
         Audio.RecordingOptionsPresets.HIGH_QUALITY
       );
       setRecording(recording);
+      startPulse();
     } catch (error) {
       console.error('Erro ao iniciar gravação:', error);
     }
@@ -85,21 +118,32 @@ export default function STTScreen() {
       await recording.stopAndUnloadAsync();
       const uri = recording.getURI();
       setRecording(null);
-
+      stopPulse();
+  
       if (!uri) {
         setTranscription('⚠️ Áudio inválido.');
         setLoading(false);
         return;
       }
-
-      const text = await transcribeAudio(uri, selectedLang.code);
-      setTranscription(text || '⚠️ Nenhum texto reconhecido.');
+  
+      // 🔍 Transcreve com deteção automática do idioma
+      const originalText = await transcribeAudio(uri);
+      if (!originalText) {
+        setTranscription('⚠️ Nenhum texto reconhecido.');
+        setLoading(false);
+        return;
+      }
+  
+      // 🌍 Traduz para o idioma selecionado
+      const translated = await translateText(originalText, selectedLang.code);
+      setTranscription(translated || '⚠️ Erro na tradução.');
+  
     } catch (error) {
       console.error('Erro ao parar gravação:', error);
-      setTranscription('⚠️ Erro ao transcrever áudio.');
+      setTranscription('⚠️ Erro ao processar áudio.');
     }
     setLoading(false);
-  };
+  };  
 
   const handleMicPress = async () => {
     triggerHaptic();
@@ -107,6 +151,7 @@ export default function STTScreen() {
     if (recording) {
       await stopRecording();
     } else {
+      setTranscription('👂 A ouvir...');
       await startRecording();
     }
   };
@@ -125,21 +170,28 @@ export default function STTScreen() {
       <View style={styles.textBox}>
         <TextInput
           style={styles.input}
-          placeholder="Fala aqui..."
+          placeholder="Bem-Vindo ao Speech-to-Text! Começa a gravar..."
           placeholderTextColor="#000"
           multiline
           editable={false}
-          value={loading ? 'A transcrever...' : transcription}
+          textAlignVertical="top"
+          value={recording ? '👂 A ouvir...' : loading ? '✍🏽 A transcrever...' : transcription}
         />
         <TouchableOpacity
           style={styles.copyIcon}
-          onPress={() => {
-            triggerHaptic();
-            playClick();
-            Alert.alert('Copiado!', 'Texto copiado para área de transferência.');
+          onPress={async () => {
+            if (!transcription.trim()) return;
+            triggerHaptic(); playClick();
+            await Clipboard.setStringAsync(transcription);
+            setCopied(true);
+            setTimeout(() => setCopied(false), 2000);
           }}
         >
-          <MaterialIcons name="content-copy" size={20} color="#000" />
+          <MaterialIcons
+            name={copied ? 'check' : 'content-copy'}
+            size={20}
+            color="#000"
+          />
         </TouchableOpacity>
       </View>
 
@@ -151,11 +203,13 @@ export default function STTScreen() {
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.micButton} onPress={handleMicPress}>
-          {loading ? (
-            <ActivityIndicator size="large" color="#fff" />
-          ) : (
-            <Image source={require('../../assets/images/mic-icon.png')} style={styles.micIcon} />
-          )}
+          <Animated.View style={[styles.pulseCircle, { transform: [{ scale: pulseAnim }] }]}>
+            {loading ? (
+              <ActivityIndicator size="large" color="#fff" />
+            ) : (
+              <Image source={require('../../assets/images/mic-icon.png')} style={styles.micIcon} />
+            )}
+          </Animated.View>
         </TouchableOpacity>
       </View>
 
@@ -203,7 +257,7 @@ const styles = StyleSheet.create({
     position: 'absolute', bottom: 10, left: 10,
   },
   bottomArea: {
-    marginTop: 120, alignItems: 'center', gap: 20,
+    marginTop: 90, alignItems: 'center', gap: 20,
   },
   dropdown: {
     backgroundColor: '#fff', borderRadius: 10,
@@ -224,6 +278,13 @@ const styles = StyleSheet.create({
   },
   micIcon: {
     width: 180, height: 180, resizeMode: 'contain',
+  },
+  pulseCircle: {
+    justifyContent: 'center',
+    alignItems: 'center',
+    backgroundColor: '#ffffff11',
+    padding: 10,
+    borderRadius: 100,
   },
   modalOverlay: {
     flex: 1, backgroundColor: '#00000088',
