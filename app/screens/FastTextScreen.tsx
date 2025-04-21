@@ -1,3 +1,4 @@
+/* app/screens/FastTextScreen.tsx */
 import React, { useState } from 'react';
 import {
   View,
@@ -9,25 +10,53 @@ import {
   StatusBar,
   Modal,
   FlatList,
+  ActivityIndicator,
 } from 'react-native';
+import { Audio } from 'expo-av';
+import { synthesizeTTS } from '../../utils/googleTTS';
+import { translateText } from '../../utils/googleTranslate';
 import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import BottomNavBar from '../components/BottomNavBar';
 import useHaptics from '../../utils/useHaptics';
 import { useSound } from '../../context/SoundContext';
 
-type LanguageOption = {
-  label: string;
-  flag: any;
-};
-
+/* ---------- Configs partilhadas com TTSScreen ---------- */
+type LanguageOption = { label: string; flag: any };
 const languages: LanguageOption[] = [
   { label: 'Português (Portugal)', flag: require('../../assets/images/flag-pt.png') },
-  { label: 'English (US)', flag: require('../../assets/images/flag-en.png') },
-  { label: 'Español (España)', flag: require('../../assets/images/flag-es.png') },
-  { label: 'Français (France)', flag: require('../../assets/images/flag-fr.png') },
+  { label: 'English (US)',         flag: require('../../assets/images/flag-en.png') },
+  { label: 'Español (España)',     flag: require('../../assets/images/flag-es.png') },
+  { label: 'Français (France)',    flag: require('../../assets/images/flag-fr.png') },
 ];
 
+/* label → BCP‑47 */
+const langMap: Record<string, string> = {
+  'Português (Portugal)': 'pt-PT',
+  'English (US)'        : 'en-US',
+  'Español (España)'    : 'es-ES',
+  'Français (France)'   : 'fr-FR',
+};
+
+/* código + voz → voiceName Standard */
+const voiceMap: Record<string, Record<'Masculina' | 'Feminina', string>> = {
+  'pt-PT': { Masculina: 'pt-PT-Standard-B', Feminina: 'pt-PT-Standard-A' },
+  'en-US': { Masculina: 'en-US-Standard-D', Feminina: 'en-US-Standard-F' },
+  'es-ES': { Masculina: 'es-ES-Standard-B', Feminina: 'es-ES-Standard-A' },
+  'fr-FR': { Masculina: 'fr-FR-Standard-B', Feminina: 'fr-FR-Standard-A' },
+};
+
+/* Velocidades disponíveis */
+const speedLabels = ['0.5x', '0.75x', '1x', '1.25x', '1.5x'] as const;
+const speedMap: Record<typeof speedLabels[number], number> = {
+  '0.5x': 0.5,
+  '0.75x': 0.75,
+  '1x': 1,
+  '1.25x': 1.25,
+  '1.5x': 1.5,
+};
+
+/* Mensagens predefinidas */
 const quickMessages = [
   'Olá,\nTudo Bem?',
   'Preciso\nde Ajuda',
@@ -41,38 +70,66 @@ const quickMessages = [
 ];
 
 export default function FastTextScreen() {
-  const router = useRouter();
-  const triggerHaptic = useHaptics();
-  const { playClick } = useSound();
+  const router         = useRouter();
+  const triggerHaptic  = useHaptics();
+  const { playClick }  = useSound();
 
-  const [selectedLang, setSelectedLang] = useState(languages[0]);
-  const [modalVisible, setModalVisible] = useState(false);
-  const [selectedSpeed, setSelectedSpeed] = useState('1x');
-  const [inputText, setInputText] = useState('');
+  /* Estado */
+  const [selectedLang,  setSelectedLang] = useState<LanguageOption>(languages[0]);
+  const [selectedSpeed, setSelectedSpeed] = useState<typeof speedLabels[number]>('1x');
+  const [inputText,     setInputText] = useState('');
+  const [modalVisible,  setModalVisible] = useState(false);
+  const [processing,    setProcessing] = useState(false);
 
-  const handleLangChange = (item: LanguageOption) => {
-    setSelectedLang(item);
-    triggerHaptic();
-    playClick();
-    setModalVisible(false);
+  /* Auxiliar — traduz + sintetiza e reproduz */
+  const speak = async (plainText: string) => {
+    const txt = plainText.trim() || ' ';
+    setProcessing(true);
+    try {
+      const translated = await translateText(txt, langMap[selectedLang.label]);
+      const uri = await synthesizeTTS({
+        text: translated,
+        langCode: langMap[selectedLang.label],
+        speakingRate: speedMap[selectedSpeed],
+        voiceName: voiceMap[langMap[selectedLang.label]].Feminina, // voz feminina por defeito
+      });
+      const { sound } = await Audio.Sound.createAsync({ uri });
+      await sound.playAsync();
+    } catch (err) {
+      console.warn('Erro TTS:', err);
+    } finally {
+      setProcessing(false);
+    }
   };
 
-  const handleSpeedSelect = (label: string) => {
-    triggerHaptic();
-    playClick();
+  /* Handlers */
+  const handleLangChange = (item: LanguageOption) => {
+    setSelectedLang(item);
+    triggerHaptic(); playClick(); setModalVisible(false);
+  };
+
+  const handleSpeedSelect = (label: typeof speedLabels[number]) => {
     setSelectedSpeed(label);
+    triggerHaptic(); playClick();
   };
 
   const handleQuickMessage = (message: string) => {
-    triggerHaptic();
-    playClick();
-    setInputText(message.replace(/\n/g, ' '));
+    const plain = message.replace(/\n/g, ' ');
+    setInputText(plain);
+    triggerHaptic(); playClick();
+    speak(plain);
   };
 
+  const handleListen = () => {
+    triggerHaptic(); playClick();
+    speak(inputText);
+  };
+
+  /* UI */
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor="#191919" barStyle="light-content" />
-      
+
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => { triggerHaptic(); playClick(); router.back(); }}>
@@ -100,8 +157,8 @@ export default function FastTextScreen() {
           value={inputText}
           onChangeText={setInputText}
         />
-        <TouchableOpacity style={styles.listenButton}>
-          <Text style={styles.listenText}>Ouvir</Text>
+        <TouchableOpacity style={[styles.listenButton, processing && { opacity: 0.6 }]} onPress={handleListen} disabled={processing}>
+          {processing ? <ActivityIndicator size="small" color="#000" /> : <Text style={styles.listenText}>Ouvir</Text>}
         </TouchableOpacity>
       </View>
 
@@ -119,23 +176,13 @@ export default function FastTextScreen() {
       <View style={styles.section}>
         <Text style={styles.label}>Velocidade</Text>
         <View style={styles.speedOptions}>
-          {['0.5x', '0.75x', '1x', '1.25x', '+'].map((label, idx) => (
+          {speedLabels.map(label => (
             <TouchableOpacity
-              key={idx}
-              style={[
-                styles.speedButton,
-                selectedSpeed === label && styles.speedButtonActive
-              ]}
+              key={label}
+              style={[styles.speedButton, selectedSpeed === label && styles.speedButtonActive]}
               onPress={() => handleSpeedSelect(label)}
             >
-              <Text
-                style={[
-                  styles.speedText,
-                  selectedSpeed === label && styles.speedTextActive
-                ]}
-              >
-                {label}
-              </Text>
+              <Text style={[styles.speedText, selectedSpeed === label && styles.speedTextActive]}>{label}</Text>
             </TouchableOpacity>
           ))}
         </View>
@@ -168,6 +215,7 @@ export default function FastTextScreen() {
   );
 }
 
+/* ---------- Estilos ---------- */
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#191919' },
   header: {
@@ -176,16 +224,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     paddingHorizontal: 15,
   },
-  backText: {
-    color: '#fff',
-    fontSize: 16,
-    fontFamily: 'Montserrat-SemiBold',
-  },
-  logo: {
-    width: 110,
-    height: 40,
-    resizeMode: 'contain',
-  },
+  backText: { color: '#fff', fontSize: 16, fontFamily: 'Montserrat-SemiBold' },
+  logo:     { width: 110, height: 40, resizeMode: 'contain' },
+
   grid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
@@ -202,22 +243,11 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
-  gridText: {
-    fontSize: 14,
-    textAlign: 'center',
-    fontFamily: 'Montserrat-Bold',
-    color: '#000',
-  },
-  section: {
-    marginTop: 20,
-    marginHorizontal: 20,
-  },
-  label: {
-    color: '#fff',
-    fontFamily: 'Montserrat-SemiBold',
-    marginBottom: 8,
-    fontSize: 16,
-  },
+  gridText: { fontSize: 14, textAlign: 'center', fontFamily: 'Montserrat-Bold', color: '#000' },
+
+  section: { marginTop: 20, marginHorizontal: 20 },
+  label: { color: '#fff', fontFamily: 'Montserrat-SemiBold', marginBottom: 8, fontSize: 16 },
+
   textBox: {
     backgroundColor: '#2a2a2a',
     borderRadius: 10,
@@ -233,11 +263,8 @@ const styles = StyleSheet.create({
     marginTop: 10,
     alignItems: 'center',
   },
-  listenText: {
-    fontSize: 16,
-    fontFamily: 'Montserrat-Bold',
-    color: '#000',
-  },
+  listenText: { fontSize: 16, fontFamily: 'Montserrat-Bold', color: '#000' },
+
   dropdown: {
     borderWidth: 1,
     borderColor: '#fff',
@@ -246,24 +273,10 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
   },
-  dropdownText: {
-    color: '#fff',
-    fontFamily: 'Montserrat-Regular',
-    fontSize: 14,
-    flex: 1,
-    marginLeft: 10,
-  },
-  flag: {
-    width: 22,
-    height: 15,
-    resizeMode: 'contain',
-  },
-  speedOptions: {
-    flexDirection: 'row',
-    justifyContent: 'space-between',
-    marginTop: 8,
-    gap: 4,
-  },
+  dropdownText: { color: '#fff', fontFamily: 'Montserrat-Regular', fontSize: 14, flex: 1, marginLeft: 10 },
+  flag: { width: 22, height: 15, resizeMode: 'contain' },
+
+  speedOptions: { flexDirection: 'row', justifyContent: 'space-between', marginTop: 8, gap: 4 },
   speedButton: {
     borderWidth: 2,
     borderColor: '#fff',
@@ -274,52 +287,14 @@ const styles = StyleSheet.create({
     minWidth: 60,
     alignItems: 'center',
   },
-  speedButtonActive: {
-    backgroundColor: '#fff',
-  },
-  speedText: {
-    color: '#fff',
-    fontFamily: 'Montserrat-SemiBold',
-    fontSize: 12,
-  },
-  speedTextActive: {
-    color: '#000',
-    fontFamily: 'Montserrat-Bold',
-  },
-  modalOverlay: {
-    flex: 1,
-    backgroundColor: '#00000088',
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  langModal: {
-    backgroundColor: '#2a2a2a',
-    borderRadius: 12,
-    width: '80%',
-    paddingVertical: 20,
-    paddingHorizontal: 15,
-  },
-  modalTitle: {
-    color: '#fff',
-    fontSize: 16,
-    fontFamily: 'Montserrat-Bold',
-    marginBottom: 15,
-    textAlign: 'center',
-  },
-  langOption: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-    paddingHorizontal: 10,
-    borderRadius: 6,
-  },
-  modalText: {
-    color: '#fff',
-    fontSize: 14,
-    fontFamily: 'Montserrat-Regular',
-    marginLeft: 10,
-  },
-  selected: {
-    backgroundColor: '#3c3c3c',
-  },
+  speedButtonActive: { backgroundColor: '#fff' },
+  speedText: { color: '#fff', fontFamily: 'Montserrat-SemiBold', fontSize: 12 },
+  speedTextActive: { color: '#000', fontFamily: 'Montserrat-Bold' },
+
+  modalOverlay: { flex: 1, backgroundColor: '#00000088', justifyContent: 'center', alignItems: 'center' },
+  langModal: { backgroundColor: '#2a2a2a', borderRadius: 12, width: '80%', paddingVertical: 20, paddingHorizontal: 15 },
+  modalTitle: { color: '#fff', fontSize: 16, fontFamily: 'Montserrat-Bold', marginBottom: 15, textAlign: 'center' },
+  langOption: { flexDirection: 'row', alignItems: 'center', paddingVertical: 12, paddingHorizontal: 10, borderRadius: 6 },
+  modalText: { color: '#fff', fontSize: 14, fontFamily: 'Montserrat-Regular', marginLeft: 10 },
+  selected: { backgroundColor: '#3c3c3c' },
 });
