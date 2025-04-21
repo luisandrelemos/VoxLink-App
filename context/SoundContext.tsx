@@ -3,7 +3,7 @@ import { createContext, useContext, useEffect, useRef, useCallback } from 'react
 import { Audio } from 'expo-av';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
-const SoundContext = createContext<{ playClick: () => void }>({
+export const SoundContext = createContext<{ playClick: () => void }>({
   playClick: () => {},
 });
 
