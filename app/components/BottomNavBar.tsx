@@ -1,7 +1,9 @@
-import { View, Image, StyleSheet, TouchableOpacity } from 'react-native';
+import { View, Image, StyleSheet, TouchableOpacity, Alert } from 'react-native';
 import { useRouter, usePathname } from 'expo-router';
 import useHaptics from '../../utils/useHaptics';
 import { useSound } from '../../context/SoundContext';
+import { listenAndRecognize } from '../../utils/VoiceAssistant';
+import { getVoiceCommand } from '../../utils/voiceCommands';
 
 export default function BottomNavBar() {
   const router = useRouter();
@@ -10,6 +12,24 @@ export default function BottomNavBar() {
   const { playClick } = useSound();
 
   const isActive = (path: string) => pathname === path;
+
+  const handleVoiceCommand = async () => {
+    triggerHaptic();
+    playClick();
+
+    try {
+      const result = await listenAndRecognize();
+      if (!result) return Alert.alert('Erro', 'Não consegui ouvir o que disseste.');
+
+      const commandRecognized = getVoiceCommand(result, router, playClick); // <- ✅ agora está correto
+      if (!commandRecognized) {
+        Alert.alert('Comando não reconhecido', `Comando: "${result}"`);
+      }
+    } catch (err) {
+      Alert.alert('Erro', 'Ocorreu um problema com o assistente de voz.');
+      console.error('Erro no assistente de voz:', err);
+    }
+  };
 
   return (
     <View style={styles.navBar}>
@@ -51,11 +71,10 @@ export default function BottomNavBar() {
         </View>
       </TouchableOpacity>
 
-      {/* Logo central */}
-      <Image
-        source={require('../../assets/images/logo.png')}
-        style={styles.navLogo}
-      />
+      {/* Botão Central (Assistente de Voz) */}
+      <TouchableOpacity onPress={handleVoiceCommand}>
+        <Image source={require('../../assets/images/logo.png')} style={styles.navLogo} />
+      </TouchableOpacity>
 
       {/* Settings */}
       <TouchableOpacity
