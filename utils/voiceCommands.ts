@@ -6,7 +6,7 @@ type VoiceCommand = {
   export function getVoiceCommand(text: string, router: any, toggleSound: () => void): boolean {
     const commandList: VoiceCommand[] = [
       {
-        keywords: ['stt', 'speech to text', 'falar', 'gravação', 'voz', 'voz para texto', 'speechtotext'],
+        keywords: ['stt', 'speech to text', 'falar', 'gravação', 'voz para texto', 'speechtotext'],
         action: () => router.replace('/stt'),
       },
       {

@@ -148,7 +148,7 @@ export default function TTSScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => { triggerHaptic(); playClick(); router.back(); }}>
-          <Text style={styles.backText}>← Text-to-Speech</Text>
+          <Text style={styles.backText}>← Texto-para-Voz</Text>
         </TouchableOpacity>
         <Image source={require('../../assets/images/logo-header.png')} style={styles.logo}/>
       </View>

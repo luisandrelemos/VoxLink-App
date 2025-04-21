@@ -25,16 +25,16 @@ export default function HomeScreen() {
         {/* Logo no topo */}
         <Image source={require('../../assets/images/logo-header.png')} style={styles.logo} />
 
-        {/* Bloco: Speech-to-Text */}
+        {/* Bloco: Voz-para-Texto */}
         <TouchableOpacity style={styles.block} onPress={() => handlePress(() => router.push('/stt'))}>
           <Image source={require('../../assets/images/stt-icon.png')} style={styles.blockImage} />
-          <Text style={styles.blockLabel}>Speech-to-Text</Text>
+          <Text style={styles.blockLabel}>Voz-para-Texto</Text>
         </TouchableOpacity>
 
-        {/* Bloco: Text-to-Speech */}
+        {/* Bloco: Texto-para-Voz */}
         <TouchableOpacity style={styles.block} onPress={() => handlePress(() => router.push('/tts'))}>
           <Image source={require('../../assets/images/tts-icon.png')} style={styles.blockImage} />
-          <Text style={styles.blockLabel}>Text-to-Speech</Text>
+          <Text style={styles.blockLabel}>Texto-para-Voz</Text>
         </TouchableOpacity>
 
         {/* Bloco: Comunicação Rápida */}
