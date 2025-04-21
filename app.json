@@ -41,6 +41,7 @@
       "typedRoutes": true
     },
     "extra": {
+      "googleTtsKey": "AIzaSyBddX5hjPzAJYkks1UmxqeJC2aUFwGiXuM",
       "router": {
         "origin": false
       },
