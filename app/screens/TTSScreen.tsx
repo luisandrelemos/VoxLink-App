@@ -1,4 +1,4 @@
-/* app/TTSScreen.tsx */
+/* app/TTSScreen.tsx (rev.) */
 import React, { useEffect, useState } from 'react';
 import {
   View,
@@ -11,19 +11,20 @@ import {
   Modal,
   FlatList,
   ScrollView,
+  ActivityIndicator,
 } from 'react-native';
 import { Audio } from 'expo-av';
 import { synthesizeTTS } from '../../utils/googleTTS';
+import { translateText } from '../../utils/googleTranslate';
 import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import BottomNavBar from '../components/BottomNavBar';
 import useHaptics from '../../utils/useHaptics';
 import { useSound } from '../../context/SoundContext';
-import { translateText } from '../../utils/googleTranslate';
 
 /* ───────────── Opções ───────────── */
-type LanguageOption = { label: string; flag: any };
+export type LanguageOption = { label: string; flag: any };
 const languages: LanguageOption[] = [
   { label: 'Português (Portugal)', flag: require('../../assets/images/flag-pt.png') },
   { label: 'English (US)',         flag: require('../../assets/images/flag-en.png') },
@@ -80,15 +81,16 @@ export default function TTSScreen() {
   };
 
   /* Estado */
-  const [text,          setText]   = useState('');
-  const [selectedLang,  setLang]   = useState<LanguageOption>(languages[0]);
-  const [selectedVoice, setVoice]  = useState<VoiceOption>(voices[0]);
-  const [selectedSpeed, setSpeed]  = useState('1x');
+  const [text,          setText]      = useState('');
+  const [selectedLang,  setLang]      = useState<LanguageOption>(languages[0]);
+  const [selectedVoice, setVoice]     = useState<VoiceOption>(voices[0]);
+  const [selectedSpeed, setSpeed]     = useState('1x');
+  const [processing,    setProcessing]= useState(false);
 
   const [langModal,  setLangModal]  = useState(false);
   const [voiceModal, setVoiceModal] = useState(false);
 
-  /* Carregar prefs */
+  /* Carregar prefs ao montar */
   useEffect(() => {
     (async () => {
       const lang  = await AsyncStorage.getItem('selectedLang');
@@ -119,14 +121,23 @@ export default function TTSScreen() {
     triggerHaptic(); playClick();
   };
 
-  const handleConvert = () => {
+  const handleConvert = async () => {
     triggerHaptic(); playClick();
-    playTTS(
-      text.trim() || ' ',
-      langMap[selectedLang.label],
-      speedMap[selectedSpeed],
-      voiceMap[langMap[selectedLang.label]][selectedVoice.label],
-    );
+    const original = text.trim() || ' ';
+    setProcessing(true);
+    try {
+      const translated = await translateText(original, langMap[selectedLang.label]);
+      await playTTS(
+        translated,
+        langMap[selectedLang.label],
+        speedMap[selectedSpeed],
+        voiceMap[langMap[selectedLang.label]][selectedVoice.label],
+      );
+    } catch (err) {
+      console.warn('Erro a traduzir/sintetizar:', err);
+    } finally {
+      setProcessing(false);
+    }
   };
 
   /* UI */
@@ -193,8 +204,16 @@ export default function TTSScreen() {
         </View>
 
         {/* Converter */}
-        <TouchableOpacity style={styles.convertButton} onPress={handleConvert}>
-          <Text style={styles.convertText}>Converter</Text>
+        <TouchableOpacity
+          style={[styles.convertButton, processing && { opacity: 0.6 }]}
+          onPress={handleConvert}
+          disabled={processing}
+        >
+          {processing ? (
+            <ActivityIndicator size="small" color="#000" />
+          ) : (
+            <Text style={styles.convertText}>Converter</Text>
+          )}
         </TouchableOpacity>
       </ScrollView>
 
@@ -269,6 +288,7 @@ const styles = StyleSheet.create({
     textAlignVertical: 'top',
     textAlign: 'left',
   },
+  spinner: { position: 'absolute', right: 12, bottom: 12 },
 
   section:      { marginTop: 10, marginHorizontal: 20 },
   sectionTight: { marginTop: 10, marginHorizontal: 20 },
