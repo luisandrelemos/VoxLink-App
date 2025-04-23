@@ -6,6 +6,9 @@ import { AuthProvider } from '../context/AuthContext';
 import { SoundProvider } from '../context/SoundContext';
 import { Stack } from 'expo-router';
 import { Audio } from 'expo-av';
+import { enableScreens } from 'react-native-screens';
+
+enableScreens(); // Ativa transições nativas otimizadas
 
 export default function Layout() {
   // Carregar as fontes
@@ -16,7 +19,6 @@ export default function Layout() {
   });
 
   useEffect(() => {
-    // Prevenir que o splash desapareça antes das fontes carregarem
     SplashScreen.preventAutoHideAsync();
     Audio.setAudioModeAsync({
       playsInSilentModeIOS: true,
@@ -39,8 +41,14 @@ export default function Layout() {
   return (
     <AuthProvider>
       <SoundProvider>
-        <View style={{ flex: 1 }} onLayout={onLayoutRootView}>
-          <Stack screenOptions={{ headerShown: false }} />
+        <View style={{ flex: 1, backgroundColor: '#191919' }} onLayout={onLayoutRootView}>
+          <Stack
+            screenOptions={{
+              headerShown: false,
+              animation: 'fade',
+              contentStyle: { backgroundColor: '#191919' },
+            }}
+          />
         </View>
       </SoundProvider>
     </AuthProvider>
