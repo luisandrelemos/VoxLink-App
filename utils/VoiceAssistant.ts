@@ -1,9 +1,9 @@
-// utils/VoiceAssistant.ts
 import { Audio } from 'expo-av';
 import { transcribeAudio } from './googleSTT';
 
 let currentRecording: Audio.Recording | null = null;
 let forceCanceled = false;
+let interval: NodeJS.Timeout | null = null;
 
 export async function listenAndRecognize(): Promise<string | null> {
   forceCanceled = false;
@@ -12,16 +12,40 @@ export async function listenAndRecognize(): Promise<string | null> {
     if (!granted) throw new Error('Sem permissão para usar o microfone.');
 
     await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
-    const { recording } = await Audio.Recording.createAsync(Audio.RecordingOptionsPresets.HIGH_QUALITY);
+
+    const { recording } = await Audio.Recording.createAsync({
+      ...Audio.RecordingOptionsPresets.HIGH_QUALITY,
+      isMeteringEnabled: true, // Habilita medição de volume
+    });
+
     currentRecording = recording;
 
-    await new Promise((resolve) => setTimeout(resolve, 3500));
+    let silentCount = 0;
+    interval = setInterval(async () => {
+      const status = await recording.getStatusAsync();
+      if (!status.isRecording) return;
 
-    if (forceCanceled) return null;
+      const meter = (status as any).metering ?? -160;
+      if (meter < -40) {
+        silentCount++;
+      } else {
+        silentCount = 0;
+      }
 
-    await recording.stopAndUnloadAsync();
+      if (silentCount >= 3) { // 1.5s de silêncio (500ms x 3)
+        clearInterval(interval!);
+        await recording.stopAndUnloadAsync();
+        currentRecording = null;
+      }
+    }, 500);
+
+    // Espera o fim da gravação
+    while ((await recording.getStatusAsync()).isRecording) {
+      if (forceCanceled) return null;
+      await new Promise((res) => setTimeout(res, 100));
+    }
+
     const uri = recording.getURI();
-    currentRecording = null;
     if (!uri) return null;
 
     const text = await transcribeAudio(uri, 'auto');
@@ -35,6 +59,7 @@ export async function listenAndRecognize(): Promise<string | null> {
 export async function cancelRecording() {
   forceCanceled = true;
   try {
+    if (interval) clearInterval(interval);
     if (currentRecording) {
       const status = await currentRecording.getStatusAsync();
       if (status.isRecording) {
