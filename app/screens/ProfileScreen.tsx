@@ -9,6 +9,7 @@ import { getAuth, signOut, updateProfile, updatePassword, reauthenticateWithCred
 import { useRouter } from 'expo-router';
 import useHaptics from '../../utils/useHaptics';
 import { useSound } from '../../context/SoundContext';
+import ScaledText from '../components/ScaledText';
 
 export default function ProfileScreen() {
   const router = useRouter();
@@ -99,7 +100,7 @@ export default function ProfileScreen() {
       {/* Header */}
       <View style={styles.header}>
         <TouchableOpacity onPress={() => { router.push('/home'); triggerHaptic(); playClick();}}>
-          <Text style={styles.backText}>← Minha Conta</Text>
+          <ScaledText base={16} style={styles.backText}>← Minha Conta</ScaledText>
         </TouchableOpacity>
         <Image source={require('../../assets/images/logo-header.png')} style={styles.logo} />
       </View>
@@ -116,19 +117,19 @@ export default function ProfileScreen() {
           }
           style={styles.avatar}
         />
-        <Text style={styles.name}>{user?.name}</Text>
-        <Text style={styles.email}>{user?.email}</Text>
+        <ScaledText base={18} style={styles.name}>{user?.name}</ScaledText>
+        <ScaledText base={14} style={styles.email}>{user?.email}</ScaledText>
 
         <TouchableOpacity style={styles.buttonOutline} onPress={() => { setModalVisible(true); triggerHaptic(); playClick();}}>
-          <Text style={styles.buttonOutlineText}>Editar Perfil</Text>
+          <ScaledText base={18} style={styles.buttonOutlineText}>Editar Perfil</ScaledText>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.buttonOutline} onPress={() => { router.push; triggerHaptic(); playClick();}}>
-          <Text style={styles.buttonOutlineText}>Preferências</Text>
+          <ScaledText base={18} style={styles.buttonOutlineText}>Preferências</ScaledText>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.buttonSolid} onPress={() => { handleLogout(); triggerHaptic(); playClick();}}>
-          <Text style={styles.buttonSolidText}>Terminar Sessão</Text>
+          <ScaledText base={18} style={styles.buttonSolidText}>Terminar Sessão</ScaledText>
         </TouchableOpacity>
       </View>
 
@@ -136,7 +137,7 @@ export default function ProfileScreen() {
       <Modal visible={isModalVisible} transparent animationType="slide">
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <Text style={styles.modalTitle}>Editar Perfil</Text>
+            <ScaledText base={18} style={styles.modalTitle}>Editar Perfil</ScaledText>
 
             <TouchableOpacity onPress={() => { pickImage(); triggerHaptic(); playClick();}}>
               <Image
@@ -149,7 +150,7 @@ export default function ProfileScreen() {
                 }
                 style={styles.avatar}
               />
-              <Text style={styles.editPhoto}>Alterar Foto</Text>
+              <ScaledText base={13} style={styles.editPhoto}>Alterar Foto</ScaledText>
             </TouchableOpacity>
 
             <TextInput
@@ -179,11 +180,11 @@ export default function ProfileScreen() {
             />
 
             <TouchableOpacity style={styles.buttonSolid} onPress={() => { handleSaveChanges(); triggerHaptic(); playClick();}}>
-              <Text style={styles.buttonSolidText}>Guardar</Text>
+              <ScaledText base={18} style={styles.buttonSolidText}>Guardar</ScaledText>
             </TouchableOpacity>
 
             <TouchableOpacity onPress={() => { setModalVisible(false); triggerHaptic(); playClick();}} style={{ marginTop: 15 }}>
-              <Text style={{ color: '#fff', fontFamily: 'Montserrat-Regular' }}>Cancelar</Text>
+              <ScaledText base={14} style={{ color: '#fff', fontFamily: 'Montserrat-Regular' }}>Cancelar</ScaledText>
             </TouchableOpacity>
           </View>
         </View>
