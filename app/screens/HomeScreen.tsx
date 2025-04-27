@@ -3,6 +3,7 @@ import { useRouter } from 'expo-router';
 import BottomNavBar from '../components/BottomNavBar';
 import useHaptics from '../../utils/useHaptics';
 import { useSound } from '../../context/SoundContext';
+import ScaledText from '../components/ScaledText'; 
 
 const { width } = Dimensions.get('window');
 
@@ -28,25 +29,25 @@ export default function HomeScreen() {
         {/* Bloco: Voz-para-Texto */}
         <TouchableOpacity style={styles.block} onPress={() => handlePress(() => router.push('/stt'))}>
           <Image source={require('../../assets/images/stt-icon.png')} style={styles.blockImage} />
-          <Text style={styles.blockLabel}>Voz-para-Texto</Text>
+          <ScaledText base={15} style={styles.blockLabel}>Voz-para-Texto</ScaledText>
         </TouchableOpacity>
 
         {/* Bloco: Texto-para-Voz */}
         <TouchableOpacity style={styles.block} onPress={() => handlePress(() => router.push('/tts'))}>
           <Image source={require('../../assets/images/tts-icon.png')} style={styles.blockImage} />
-          <Text style={styles.blockLabel}>Texto-para-Voz</Text>
+          <ScaledText base={15} style={styles.blockLabel}>Texto-para-Voz</ScaledText>
         </TouchableOpacity>
 
         {/* Bloco: Comunicação Rápida */}
         <TouchableOpacity style={styles.block} onPress={() => handlePress(() => router.push('/fasttext'))}>
           <Image source={require('../../assets/images/list-icon.png')} style={styles.blockImage} />
-          <Text style={styles.blockLabel}>Comunicação Rápida</Text>
+          <ScaledText base={15} style={styles.blockLabel}>Comunicação Rápida</ScaledText>
         </TouchableOpacity>
 
         {/* Bloco: Acessibilidade */}
         <TouchableOpacity style={styles.block} onPress={() => handlePress(() => router.push('/settings'))}>
           <Image source={require('../../assets/images/accessibility-icon.png')} style={styles.blockImage} />
-          <Text style={styles.blockLabel}>Acessibilidade</Text>
+          <ScaledText base={15} style={styles.blockLabel}>Acessibilidade</ScaledText>
         </TouchableOpacity>
       </View>
 
