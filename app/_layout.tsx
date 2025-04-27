@@ -8,6 +8,7 @@ import { FontSizeProvider } from '../context/FontSizeContext';
 import { Stack } from 'expo-router';
 import { Audio } from 'expo-av';
 import { enableScreens } from 'react-native-screens';
+import { TTSVoiceProvider } from '../context/TTSVoiceContext';
 
 enableScreens(); // Ativa transições nativas otimizadas
 
@@ -42,15 +43,17 @@ export default function Layout() {
     <AuthProvider>
       <SoundProvider>
         <FontSizeProvider>
-          <View style={{ flex: 1, backgroundColor: '#191919' }} onLayout={onLayoutRootView}>
-            <Stack
-              screenOptions={{
-                headerShown: false,
-                animation: 'fade', // Transição mais suave
-                contentStyle: { backgroundColor: '#191919' },
-              }}
-            />
-          </View>
+          <TTSVoiceProvider>
+            <View style={{ flex: 1, backgroundColor: '#191919' }} onLayout={onLayoutRootView}>
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                  animation: 'fade', // Transição mais suave
+                  contentStyle: { backgroundColor: '#191919' },
+                }}
+              />
+            </View>
+          </TTSVoiceProvider>
         </FontSizeProvider>
       </SoundProvider>
     </AuthProvider>
