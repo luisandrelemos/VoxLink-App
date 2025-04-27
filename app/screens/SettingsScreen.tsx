@@ -11,6 +11,7 @@ import useHaptics from '../../utils/useHaptics';
 import { useSound } from '../../context/SoundContext';
 import { useFontSize } from '../../context/FontSizeContext';
 import ScaledText from '../components/ScaledText'; 
+import { useTTSVoice } from '../../context/TTSVoiceContext';
 
 // Dados
 const languages = [
@@ -20,9 +21,9 @@ const languages = [
   { label: 'Français (France)', flag: require('../../assets/images/flag-fr.png') },
 ];
 
-const contrastThemes = [
-  { label: 'Monocromático', icon: require('../../assets/images/icon-theme-mono.png') },
-  { label: 'Colorido', icon: require('../../assets/images/icon-theme-color.png') },
+const ttsVoices = [
+  { label: 'Feminina',  icon: require('../../assets/images/voice-f.png') },
+  { label: 'Masculina', icon: require('../../assets/images/voice-m.png') },
 ];
 
 const userTypes = [
@@ -42,33 +43,36 @@ export default function SettingsScreen() {
   const triggerHaptic = useHaptics();
   const { playClick } = useSound();
 
-  /* ‣ Fonte via contexto */
+  /* Fonte */
   const { fontSizeMultiplier, setFontSizeMultiplier } = useFontSize();
   const [sliderValue, setSliderValue] = useState(multiplierToStep(fontSizeMultiplier));
 
-  const [selectedLang, setSelectedLang] = useState(languages[0]);
-  const [selectedTheme, setSelectedTheme] = useState(contrastThemes[0]);
+  /* Idioma & tipo de utilizador */
+  const [selectedLang, setSelectedLang]     = useState(languages[0]);
   const [selectedUserType, setSelectedUserType] = useState(userTypes[1]);
 
-  const [langModalVisible, setLangModalVisible] = useState(false);
-  const [themeModalVisible, setThemeModalVisible] = useState(false);
+  /* Voz global do TTS */
+  const { voice, setVoice } = useTTSVoice();
+  const [voiceModalVisible, setVoiceModalVisible] = useState(false);
+
+  /* Modais */
+  const [langModalVisible,  setLangModalVisible]  = useState(false);
   const [userTypeModalVisible, setUserTypeModalVisible] = useState(false);
 
-  const [feedbackSound, setFeedbackSound] = useState(false);
+  /* Switches */
+  const [feedbackSound, setFeedbackSound]   = useState(false);
   const [hapticFeedback, setHapticFeedback] = useState(false);
-  const [voiceCommands, setVoiceCommands] = useState(false);
+  const [voiceCommands,  setVoiceCommands]  = useState(false);
 
   useEffect(() => {
     const loadPreferences = async () => {
       const lang = await AsyncStorage.getItem('selectedLang');
-      const theme = await AsyncStorage.getItem('selectedTheme');
       const type = await AsyncStorage.getItem('selectedUserType');
       const sound = await AsyncStorage.getItem('feedbackSound');
       const haptic = await AsyncStorage.getItem('hapticFeedback');
       const voice = await AsyncStorage.getItem('voiceCommands');
 
       if (lang) setSelectedLang(JSON.parse(lang));
-      if (theme) setSelectedTheme(JSON.parse(theme));
       if (type) setSelectedUserType(JSON.parse(type));
       if (sound) setFeedbackSound(JSON.parse(sound));
       if (haptic) setHapticFeedback(JSON.parse(haptic));
@@ -79,8 +83,8 @@ export default function SettingsScreen() {
   }, []);
   
   const handleFontSizeChange = (step: number) => {
-    setSliderValue(step);                    // UI
-    setFontSizeMultiplier(stepToMultiplier(step));  // contexto + AsyncStorage
+    setSliderValue(step);                 
+    setFontSizeMultiplier(stepToMultiplier(step)); 
     triggerHaptic();
     playClick();
   };
@@ -154,36 +158,27 @@ export default function SettingsScreen() {
           <ScaledText base={18} style={styles.sliderLabel}>aA</ScaledText>
         </View>
 
-        {/* Tema */}
-        <ScaledText base={16} style={styles.label}>Tema Alto Contraste</ScaledText>
-        <TouchableOpacity style={styles.dropdown} onPress={() => { setThemeModalVisible(true); triggerHaptic(); playClick();}}>
-          <Image source={selectedTheme.icon} style={styles.optionIcon} />
-          <ScaledText base={14} style={styles.dropdownText}>{selectedTheme.label}</ScaledText>
+        {/* Voz Global do TTS */}
+        <ScaledText base={16} style={styles.label}>Voz do TTS</ScaledText>
+        <TouchableOpacity style={styles.dropdown} onPress={() => { setVoiceModalVisible(true); triggerHaptic(); playClick(); }}>
+          <Image source={voice === 'Feminina' ? ttsVoices[0].icon : ttsVoices[1].icon} style={styles.voiceIcon}/>
+          <ScaledText base={14} style={styles.dropdownText}>{voice}</ScaledText>
         </TouchableOpacity>
 
-        <Modal visible={themeModalVisible} transparent animationType="fade">
-          <TouchableOpacity style={styles.modalOverlay} onPress={() => setThemeModalVisible(false)} activeOpacity={1}>
+        <Modal visible={voiceModalVisible} transparent animationType="fade">
+          <TouchableOpacity style={styles.modalOverlay} onPress={() => setVoiceModalVisible(false)} activeOpacity={1}>
             <View style={styles.langModal}>
-              <ScaledText base={16} style={styles.modalTitle}>Escolhe o tema</ScaledText>
-              <FlatList
-                data={contrastThemes}
-                keyExtractor={(item) => item.label}
-                renderItem={({ item }) => (
-                  <TouchableOpacity
-                    style={[styles.langOption, selectedTheme.label === item.label && styles.selected]}
-                    onPress={async () => {
-                      setSelectedTheme(item);
-                      await AsyncStorage.setItem('selectedTheme', JSON.stringify(item));
-                      setThemeModalVisible(false);
-                      triggerHaptic();
-                      playClick();
-                    }}
-                  >
-                    <Image source={item.icon} style={styles.optionIcon} />
-                    <ScaledText base={14} style={styles.dropdownText}>{item.label}</ScaledText>
-                  </TouchableOpacity>
-                )}
-              />
+              <ScaledText base={16} style={styles.modalTitle}>Escolhe a voz</ScaledText>
+              {ttsVoices.map(v => (
+                <TouchableOpacity
+                  key={v.label}
+                  style={[styles.langOption, voice === v.label && styles.selected]}
+                  onPress={() => { setVoice(v.label as any); setVoiceModalVisible(false); triggerHaptic(); playClick(); }}
+                >
+                  <Image source={v.icon} style={styles.voiceIcon}/>
+                  <ScaledText base={14} style={styles.dropdownText}>{v.label}</ScaledText>
+                </TouchableOpacity>
+              ))}
             </View>
           </TouchableOpacity>
         </Modal>
@@ -299,6 +294,13 @@ const styles = StyleSheet.create({
     height: 16,
     marginRight: 10,
     resizeMode: 'contain',
+  },
+  voiceIcon: {  
+    width: 20,
+    height: 20,
+    marginRight: 10,
+    resizeMode: 'contain',
+    tintColor: '#fff',
   },
   optionIcon: {
     width: 20,

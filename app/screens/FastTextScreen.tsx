@@ -19,7 +19,7 @@ import { MaterialIcons } from '@expo/vector-icons';
 import BottomNavBar from '../components/BottomNavBar';
 import useHaptics from '../../utils/useHaptics';
 import { useSound } from '../../context/SoundContext';
-
+import { useTTSVoice } from '../../context/TTSVoiceContext';
 import ScaledText from '../components/ScaledText';        
 import { useFontSize } from '../../context/FontSizeContext';   
 
@@ -75,7 +75,8 @@ export default function FastTextScreen() {
   const router         = useRouter();
   const triggerHaptic  = useHaptics();
   const { playClick }  = useSound();
-  const { fontSizeMultiplier } = useFontSize();         
+  const { fontSizeMultiplier } = useFontSize();
+  const { voice } = useTTSVoice();      
 
   /* Estado */
   const [selectedLang,  setSelectedLang] = useState<LanguageOption>(languages[0]);
@@ -94,7 +95,7 @@ export default function FastTextScreen() {
         text: translated,
         langCode: langMap[selectedLang.label],
         speakingRate: speedMap[selectedSpeed],
-        voiceName: voiceMap[langMap[selectedLang.label]].Feminina, // voz feminina por defeito
+        voiceName: voiceMap[langMap[selectedLang.label]][voice],
       });
       const { sound } = await Audio.Sound.createAsync({ uri });
       await sound.playAsync();

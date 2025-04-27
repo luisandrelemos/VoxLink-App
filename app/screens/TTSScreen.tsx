@@ -1,5 +1,5 @@
 /* app/TTSScreen.tsx */
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useCallback } from 'react';
 import {
   View,
   StyleSheet,
@@ -18,12 +18,14 @@ import { translateText } from '../../utils/googleTranslate';
 import { useRouter } from 'expo-router';
 import { MaterialIcons } from '@expo/vector-icons';
 import AsyncStorage from '@react-native-async-storage/async-storage';
-import BottomNavBar from '../components/BottomNavBar';
-import useHaptics from '../../utils/useHaptics';
-import { useSound } from '../../context/SoundContext';
+import { useFocusEffect } from '@react-navigation/native';
 
-import ScaledText from '../components/ScaledText';
-import { useFontSize } from '../../context/FontSizeContext';
+import BottomNavBar      from '../components/BottomNavBar';
+import useHaptics        from '../../utils/useHaptics';
+import { useSound }      from '../../context/SoundContext';
+import { useTTSVoice }   from '../../context/TTSVoiceContext';
+import ScaledText        from '../components/ScaledText';
+import { useFontSize }   from '../../context/FontSizeContext';
 
 /* ───────────── Opções ───────────── */
 export type LanguageOption = { label: string; flag: any };
@@ -72,49 +74,64 @@ export default function TTSScreen() {
   const { playClick } = useSound();
   const { fontSizeMultiplier } = useFontSize();
 
-  /* Auxiliar: gera áudio e reproduz */
-  const playTTS = async (txt: string, lang: string, rate: number, voiceName: string) => {
-    try {
-      const uri = await synthesizeTTS({ text: txt, langCode: lang, speakingRate: rate, voiceName });
-      const { sound } = await Audio.Sound.createAsync({ uri });
-      await sound.playAsync();
-    } catch (err) {
-      console.warn('Erro a reproduzir TTS:', err);
-    }
-  };
+  /* preferência global vinda das Definições */
+  const { voice: globalVoice } = useTTSVoice();
 
-  /* Estado */
-  const [text,          setText]      = useState('');
-  const [selectedLang,  setLang]      = useState<LanguageOption>(languages[0]);
-  const [selectedVoice, setVoice]     = useState<VoiceOption>(voices[0]);
-  const [selectedSpeed, setSpeed]     = useState('1x');
-  const [processing,    setProcessing]= useState(false);
+  /* helper seguro: devolve sempre um VoiceOption válido */
+  const byLabel = (lbl: string): VoiceOption =>
+    voices.find(v => v.label.toLowerCase().startsWith(lbl.toLowerCase())) ?? voices[0];
 
-  const [langModal,  setLangModal]  = useState(false);
-  const [voiceModal, setVoiceModal] = useState(false);
+  /* Estado local (voz inicial = global) */
+  const [selectedVoice, setVoice] = useState<VoiceOption>(byLabel(globalVoice));
+  const [text, setText]           = useState('');
+  const [selectedLang, setLang]   = useState<LanguageOption>(languages[0]);
+  const [selectedSpeed, setSpeed] = useState('1x');
+  const [processing, setProcessing] = useState(false);
 
-  /* Carregar prefs ao montar */
+  const [langModal, setLangModal]     = useState(false);
+  const [voiceModal, setVoiceModal]   = useState(false);
+
+  /* sempre que o valor global mudar */
+  useEffect(() => { setVoice(byLabel(globalVoice)); }, [globalVoice]);
+
+  /* …e cada vez que o ecrã ganha foco */
+  useFocusEffect(
+    useCallback(() => {
+      setVoice(byLabel(globalVoice));
+    }, [globalVoice])
+  );
+
+  /* Carregar prefs (idioma/velocidade) */
   useEffect(() => {
     (async () => {
       const lang  = await AsyncStorage.getItem('selectedLang');
-      const voice = await AsyncStorage.getItem('selectedVoice');
       const speed = await AsyncStorage.getItem('selectedSpeed');
       if (lang)  setLang(JSON.parse(lang));
-      if (voice) setVoice(JSON.parse(voice));
       if (speed) setSpeed(speed);
     })();
   }, []);
 
+  /* sintetiza e reproduz */
+  const playTTS = async (txt: string) => {
+    const uri = await synthesizeTTS({
+      text: txt,
+      langCode: langMap[selectedLang.label],
+      speakingRate: speedMap[selectedSpeed],
+      voiceName: voiceMap[langMap[selectedLang.label]][selectedVoice.label],
+    });
+    const { sound } = await Audio.Sound.createAsync({ uri });
+    await sound.playAsync();
+  };
+
   /* Handlers */
-  const handleLangChange  = async (item: LanguageOption) => {
+  const handleLangChange = async (item: LanguageOption) => {
     setLang(item);
     await AsyncStorage.setItem('selectedLang', JSON.stringify(item));
     triggerHaptic(); playClick(); setLangModal(false);
   };
 
   const handleVoiceChange = async (item: VoiceOption) => {
-    setVoice(item);
-    await AsyncStorage.setItem('selectedVoice', JSON.stringify(item));
+    setVoice(item);                         // ↔ só local
     triggerHaptic(); playClick(); setVoiceModal(false);
   };
 
@@ -126,18 +143,12 @@ export default function TTSScreen() {
 
   const handleConvert = async () => {
     triggerHaptic(); playClick();
-    const original = text.trim() || ' ';
     setProcessing(true);
     try {
-      const translated = await translateText(original, langMap[selectedLang.label]);
-      await playTTS(
-        translated,
-        langMap[selectedLang.label],
-        speedMap[selectedSpeed],
-        voiceMap[langMap[selectedLang.label]][selectedVoice.label],
-      );
+      const translated = await translateText(text.trim() || ' ', langMap[selectedLang.label]);
+      await playTTS(translated);
     } catch (err) {
-      console.warn('Erro a traduzir/sintetizar:', err);
+      console.warn('Erro TTS:', err);
     } finally {
       setProcessing(false);
     }
@@ -169,10 +180,13 @@ export default function TTSScreen() {
           />
         </View>
 
-        {/* VOZ */}
+        {/* Voz (apenas local) */}
         <View style={styles.sectionTight}>
           <ScaledText base={16} style={styles.label}>Voz</ScaledText>
-          <TouchableOpacity style={styles.dropdown} onPress={() => { triggerHaptic(); playClick(); setVoiceModal(true); }}>
+          <TouchableOpacity
+            style={styles.dropdown}
+            onPress={() => { triggerHaptic(); playClick(); setVoiceModal(true); }}
+          >
             <Image source={selectedVoice.icon} style={styles.voiceIcon}/>
             <ScaledText base={14} style={styles.dropdownText}>{selectedVoice.label}</ScaledText>
             <MaterialIcons name="arrow-drop-down" size={24} color="#fff"/>
@@ -216,11 +230,9 @@ export default function TTSScreen() {
           onPress={handleConvert}
           disabled={processing}
         >
-          {processing ? (
-            <ActivityIndicator size="small" color="#000" />
-          ) : (
-            <ScaledText base={20} style={styles.convertText}>Converter</ScaledText>
-          )}
+          {processing
+            ? <ActivityIndicator size="small" color="#000" />
+            : <ScaledText base={20} style={styles.convertText}>Converter</ScaledText>}
         </TouchableOpacity>
       </ScrollView>
 
@@ -273,6 +285,7 @@ export default function TTSScreen() {
 /* ───────────── Estilos ───────────── */
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: '#191919' },
+
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
