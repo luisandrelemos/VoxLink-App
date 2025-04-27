@@ -4,14 +4,15 @@ import { useEffect, useCallback } from 'react';
 import { View } from 'react-native';
 import { AuthProvider } from '../context/AuthContext';
 import { SoundProvider } from '../context/SoundContext';
+import { FontSizeProvider } from '../context/FontSizeContext'; 
 import { Stack } from 'expo-router';
 import { Audio } from 'expo-av';
 import { enableScreens } from 'react-native-screens';
+import { TTSVoiceProvider } from '../context/TTSVoiceContext';
 
 enableScreens(); // Ativa transições nativas otimizadas
 
 export default function Layout() {
-  // Carregar as fontes
   const [fontsLoaded] = useFonts({
     'Montserrat-Regular': require('../assets/fonts/Montserrat-Regular.ttf'),
     'Montserrat-SemiBold': require('../assets/fonts/Montserrat-SemiBold.ttf'),
@@ -41,15 +42,19 @@ export default function Layout() {
   return (
     <AuthProvider>
       <SoundProvider>
-        <View style={{ flex: 1, backgroundColor: '#191919' }} onLayout={onLayoutRootView}>
-          <Stack
-            screenOptions={{
-              headerShown: false,
-              animation: 'fade',
-              contentStyle: { backgroundColor: '#191919' },
-            }}
-          />
-        </View>
+        <FontSizeProvider>
+          <TTSVoiceProvider>
+            <View style={{ flex: 1, backgroundColor: '#191919' }} onLayout={onLayoutRootView}>
+              <Stack
+                screenOptions={{
+                  headerShown: false,
+                  animation: 'fade', // Transição mais suave
+                  contentStyle: { backgroundColor: '#191919' },
+                }}
+              />
+            </View>
+          </TTSVoiceProvider>
+        </FontSizeProvider>
       </SoundProvider>
     </AuthProvider>
   );
