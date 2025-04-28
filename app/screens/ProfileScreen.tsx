@@ -124,8 +124,9 @@ export default function ProfileScreen() {
           <ScaledText base={18} style={styles.buttonOutlineText}>Editar Perfil</ScaledText>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.buttonOutline} onPress={() => { router.push; triggerHaptic(); playClick();}}>
-          <ScaledText base={18} style={styles.buttonOutlineText}>Preferências</ScaledText>
+        <TouchableOpacity style={styles.buttonOutline}
+          onPress={() => { triggerHaptic(); playClick(); router.push('/usertypescreen'); }}>
+          <ScaledText base={18} style={styles.buttonOutlineText}>Tipo de Utilizador</ScaledText>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.buttonSolid} onPress={() => { handleLogout(); triggerHaptic(); playClick();}}>
