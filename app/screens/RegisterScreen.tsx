@@ -37,7 +37,7 @@ export default function RegisterScreen() {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       await updateProfile(userCredential.user, { displayName: name });
       Alert.alert('Sucesso', 'Conta criada com sucesso!');
-      router.replace('/login');
+      router.replace('/usertypescreen');
     } catch (error: any) {
       Alert.alert('Erro no registo', error.message);
     }
