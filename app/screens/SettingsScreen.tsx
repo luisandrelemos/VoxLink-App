@@ -73,11 +73,21 @@ export default function SettingsScreen() {
       const voice = await AsyncStorage.getItem('voiceCommands');
 
       if (lang) setSelectedLang(JSON.parse(lang));
-      if (type) setSelectedUserType(JSON.parse(type));
-      if (sound) setFeedbackSound(JSON.parse(sound));
-      if (haptic) setHapticFeedback(JSON.parse(haptic));
-      if (voice) setVoiceCommands(JSON.parse(voice));
-    };
+      if (type) {
+          const saved = JSON.parse(type);
+          // se já temos o ícone gravado, usamos directamente
+          if (saved.icon) {
+            setSelectedUserType(saved);
+          } else {
+            // compatibilidade com registos antigos
+            const mapped = userTypes.find(u => u.label === saved.label) || userTypes[0];
+            setSelectedUserType(mapped);
+          }
+        }     
+        if (sound) setFeedbackSound(JSON.parse(sound));
+        if (haptic) setHapticFeedback(JSON.parse(haptic));
+        if (voice) setVoiceCommands(JSON.parse(voice));
+      };
 
     loadPreferences();
   }, []);
