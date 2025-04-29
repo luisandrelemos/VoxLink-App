@@ -1,26 +1,19 @@
 /* app/screens/SettingsScreen.tsx */
 import React, { useEffect, useState } from 'react';
 import {
-  View,
-  StyleSheet,
-  Image,
-  TouchableOpacity,
-  StatusBar,
-  Switch,
-  FlatList,
-  Modal,
-  DeviceEventEmitter,            // <- comunica com BottomNavBar
+  View, StyleSheet, Image, TouchableOpacity, StatusBar,
+  Switch, FlatList, Modal, DeviceEventEmitter,
 } from 'react-native';
-import Slider from '@react-native-community/slider';
-import { useRouter } from 'expo-router';
-import AsyncStorage from '@react-native-async-storage/async-storage';
+import Slider          from '@react-native-community/slider';
+import { useRouter }   from 'expo-router';
+import AsyncStorage    from '@react-native-async-storage/async-storage';
 
-import BottomNavBar   from '../components/BottomNavBar';
-import useHaptics     from '../../utils/useHaptics';
-import { useSound }   from '../../context/SoundContext';
+import BottomNavBar    from '../components/BottomNavBar';
+import useHaptics      from '../../utils/useHaptics';
+import { useSound }    from '../../context/SoundContext';
 import { useFontSize } from '../../context/FontSizeContext';
 import { useTTSVoice } from '../../context/TTSVoiceContext';
-import ScaledText     from '../components/ScaledText';
+import ScaledText      from '../components/ScaledText';
 
 /* ─────────── dados estáticos ─────────── */
 const languages = [
@@ -42,28 +35,36 @@ const userTypes = [
   { label: 'Outros', icon: require('../../assets/images/icon-others.png') },
 ];
 
-/* Escala de fonte */
+/* ------------- defaults por tipo ------------- */
+const defaults: Record<string, { sound:boolean; haptic:boolean; voiceCmd:boolean }> = {
+  Cego:   { sound:true,  haptic:true,  voiceCmd:true  },
+  Surdo:  { sound:false, haptic:true,  voiceCmd:true  },
+  Mudo:   { sound:true,  haptic:true,  voiceCmd:false },
+  Outros: { sound:true,  haptic:true,  voiceCmd:true  },
+};
+
+/* ---------- escala de fonte ---------- */
 const FONT_STEPS = [0.85, 1, 1.15];
-const stepToMultiplier  = (s:number)=>FONT_STEPS[s] ?? 1;
-const multiplierToStep  = (m:number)=>(m<0.9?0:m>1.05?2:1);
+const roundStep    = (v:number)=>Math.round(Math.min(2, Math.max(0, v)));
+const stepToMult   = (s:number)=>FONT_STEPS[s] ?? 1;
+const multToStep   = (m:number)=>(m<0.9?0:m>1.05?2:1);
 
 /* ─────────── componente ─────────── */
 export default function SettingsScreen() {
-
-  /* --- helpers --- */
+  /* helpers */
   const router        = useRouter();
   const haptic        = useHaptics();
   const { playClick } = useSound();
 
-  /* --- contexto de fonte --- */
+  /* contexto de fonte */
   const { fontSizeMultiplier, setFontSizeMultiplier } = useFontSize();
-  const [sliderValue, setSliderValue] = useState(multiplierToStep(fontSizeMultiplier));
+  const [sliderVal, setSliderVal] = useState(multToStep(fontSizeMultiplier));
 
-  /* --- prefs seleccionadas --- */
+  /* prefs seleccionadas */
   const [selectedLang,     setSelectedLang]     = useState(languages[0]);
-  const [selectedUserType, setSelectedUserType] = useState(userTypes[1]);
+  const [selectedUserType, setSelectedUserType] = useState(userTypes[0]);
 
-  /* --- TTS --- */
+  /* voz TTS */
   const { voice, setVoice } = useTTSVoice();
 
   /* visibilidade modais */
@@ -76,36 +77,59 @@ export default function SettingsScreen() {
   const [hapticFeedback,setHapticFeedback] = useState(false);
   const [voiceCommands, setVoiceCommands]  = useState(false);
 
-  /* --- carregar prefs guardadas --- */
+  /* ---------- aplicar defaults ---------- */
+  const applyTypeDefaults = async (typeLabel:string) => {
+    const { sound, haptic, voiceCmd } = defaults[typeLabel] ?? defaults.Outros;
+
+    /* actualizar estado */
+    setFeedbackSound(sound);
+    setHapticFeedback(haptic);
+    setVoiceCommands(voiceCmd);
+
+    /* persistir */
+    await AsyncStorage.multiSet([
+      ['feedbackSound',  JSON.stringify(sound)],
+      ['hapticFeedback', JSON.stringify(haptic)],
+      ['voiceCommands',  JSON.stringify(voiceCmd)],
+    ]);
+
+    /* avisar BottomNavBar se necessário */
+    DeviceEventEmitter.emit('voiceCommandsToggle', voiceCmd);
+  };
+
+  /* ---------- carregar prefs ---------- */
   useEffect(() => {
     (async () => {
-      const lang   = await AsyncStorage.getItem('selectedLang');
-      const type   = await AsyncStorage.getItem('selectedUserType');
-      const sound  = await AsyncStorage.getItem('feedbackSound');
-      const haptic = await AsyncStorage.getItem('hapticFeedback');
-      const vcmd   = await AsyncStorage.getItem('voiceCommands');
+      const [
+        lang, type, sound, haptic, vcmd,
+      ] = await AsyncStorage.multiGet([
+        'selectedLang', 'selectedUserType',
+        'feedbackSound', 'hapticFeedback', 'voiceCommands',
+      ]);
 
-      if (lang) setSelectedLang(JSON.parse(lang));
-
-      if (type) {
-        const saved = JSON.parse(type);
-        setSelectedUserType(saved.icon ? saved
-                                       : userTypes.find(u=>u.label===saved.label) || userTypes[0]);
+      if (lang[1])  setSelectedLang(JSON.parse(lang[1]));
+      if (type[1])  {
+        const saved = JSON.parse(type[1]);
+        setSelectedUserType(
+          saved.icon ? saved : userTypes.find(u=>u.label===saved.label) || userTypes[0]
+        );
       }
-      if (sound)  setFeedbackSound(JSON.parse(sound));
-      if (haptic) setHapticFeedback(JSON.parse(haptic));
-      if (vcmd)   setVoiceCommands(JSON.parse(vcmd));
+      if (sound[1])  setFeedbackSound(JSON.parse(sound[1]));
+      if (haptic[1]) setHapticFeedback(JSON.parse(haptic[1]));
+      if (vcmd[1])   setVoiceCommands(JSON.parse(vcmd[1]));
     })();
   }, []);
 
-  /* --- handlers --- */
-  const handleFontSizeChange = (step:number)=>{
-    setSliderValue(step);
-    setFontSizeMultiplier(stepToMultiplier(step));
+  /* ---------- font slider ---------- */
+  const onSlide    = (val:number) => setSliderVal(val);            // move “livre”
+  const onRelease  = (val:number) => {
+    const step = roundStep(val);
+    setSliderVal(step);
+    setFontSizeMultiplier(stepToMult(step));
     haptic(); playClick();
   };
 
-  /* ─────────── UI ─────────── */
+  /* ──────────────────────────── UI ──────────────────────────── */
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#191919" />
@@ -129,11 +153,10 @@ export default function SettingsScreen() {
           <ScaledText base={14} style={styles.dropdownText}>{selectedLang.label}</ScaledText>
         </TouchableOpacity>
 
-        {/* Modal Idioma */}
+        {/* ---------- modal Idioma ---------- */}
         <Modal visible={langModalVisible} transparent animationType="fade">
-          <TouchableOpacity style={styles.modalOverlay}
-                            activeOpacity={1}
-                            onPress={()=>setLangModalVisible(false)}>
+          <TouchableOpacity style={styles.modalOverlay} activeOpacity={1}
+            onPress={()=>setLangModalVisible(false)}>
             <View style={styles.langModal}>
               <ScaledText base={16} style={styles.modalTitle}>Escolhe o idioma</ScaledText>
               <FlatList
@@ -146,8 +169,7 @@ export default function SettingsScreen() {
                     onPress={async ()=>{
                       setSelectedLang(item);
                       await AsyncStorage.setItem('selectedLang',JSON.stringify(item));
-                      setLangModalVisible(false);
-                      haptic(); playClick();
+                      setLangModalVisible(false); haptic(); playClick();
                     }}>
                     <Image source={item.flag} style={styles.flag}/>
                     <ScaledText base={14} style={styles.dropdownText}>{item.label}</ScaledText>
@@ -158,14 +180,22 @@ export default function SettingsScreen() {
           </TouchableOpacity>
         </Modal>
 
-        {/* ---------- Tamanho de texto ---------- */}
+        {/* ---------- Tamanho do texto ---------- */}
         <ScaledText base={16} style={styles.label}>Tamanho Do Texto</ScaledText>
         <View style={styles.sliderTrack}>
           <ScaledText base={13} style={styles.sliderLabel}>aA</ScaledText>
-          <Slider minimumValue={0} maximumValue={2} step={1}
-                  value={sliderValue} onValueChange={handleFontSizeChange}
-                  minimumTrackTintColor="#fff" maximumTrackTintColor="#444"
-                  thumbTintColor="#fff" style={{flex:1}} />
+          <Slider
+          minimumValue={0}
+          maximumValue={2}
+          step={0.01}                     
+          value={sliderVal}
+          onValueChange={onSlide}          
+          onSlidingComplete={onRelease}    
+          minimumTrackTintColor="#fff"
+          maximumTrackTintColor="#444"
+          thumbTintColor="#fff"
+          style={{ flex: 1 }}
+        />
           <ScaledText base={18} style={styles.sliderLabel}>aA</ScaledText>
         </View>
 
@@ -178,11 +208,9 @@ export default function SettingsScreen() {
           <ScaledText base={14} style={styles.dropdownText}>{voice}</ScaledText>
         </TouchableOpacity>
 
-        {/* Modal Voz */}
         <Modal visible={voiceModalVisible} transparent animationType="fade">
-          <TouchableOpacity style={styles.modalOverlay}
-                            activeOpacity={1}
-                            onPress={()=>setVoiceModalVisible(false)}>
+          <TouchableOpacity style={styles.modalOverlay} activeOpacity={1}
+            onPress={()=>setVoiceModalVisible(false)}>
             <View style={styles.langModal}>
               <ScaledText base={16} style={styles.modalTitle}>Escolhe a voz</ScaledText>
               {ttsVoices.map(v=>(
@@ -191,8 +219,7 @@ export default function SettingsScreen() {
                   onPress={async ()=>{
                     setVoice(v.label as any);
                     await AsyncStorage.setItem('ttsVoice',JSON.stringify(v.label));
-                    setVoiceModalVisible(false);
-                    haptic(); playClick();
+                    setVoiceModalVisible(false); haptic(); playClick();
                   }}>
                   <Image source={v.icon} style={styles.voiceIcon}/>
                   <ScaledText base={14} style={styles.dropdownText}>{v.label}</ScaledText>
@@ -210,11 +237,9 @@ export default function SettingsScreen() {
           <ScaledText base={14} style={styles.dropdownText}>{selectedUserType.label}</ScaledText>
         </TouchableOpacity>
 
-        {/* Modal Tipo utilizador */}
         <Modal visible={userTypeModalVisible} transparent animationType="fade">
-          <TouchableOpacity style={styles.modalOverlay}
-                            activeOpacity={1}
-                            onPress={()=>setUserTypeModalVisible(false)}>
+          <TouchableOpacity style={styles.modalOverlay} activeOpacity={1}
+            onPress={()=>setUserTypeModalVisible(false)}>
             <View style={styles.langModal}>
               <ScaledText base={16} style={styles.modalTitle}>Escolhe o tipo</ScaledText>
               <FlatList
@@ -225,9 +250,14 @@ export default function SettingsScreen() {
                     style={[styles.langOption,
                             selectedUserType.label===item.label && styles.selected]}
                     onPress={async ()=>{
+                      /* guardar tipo */
                       setSelectedUserType(item);
                       await AsyncStorage.setItem('selectedUserType',JSON.stringify(item));
                       setUserTypeModalVisible(false);
+
+                      /* aplicar defaults */
+                      await applyTypeDefaults(item.label);
+
                       haptic(); playClick();
                     }}>
                     <Image source={item.icon} style={styles.optionIcon}/>
@@ -242,11 +272,11 @@ export default function SettingsScreen() {
         {/* ---------- Switches ---------- */}
         {[
           { key:'feedbackSound',  label:'Feedback Sonoro', desc:'Sons em interações',
-            value:feedbackSound, setter:setFeedbackSound },
+            value:feedbackSound,  setter:setFeedbackSound },
           { key:'hapticFeedback', label:'Feedback Tátil',  desc:'Vibração em interações',
             value:hapticFeedback, setter:setHapticFeedback },
           { key:'voiceCommands',  label:'Comandos por Voz', desc:'Ativa o assistente no logótipo',
-            value:voiceCommands, setter:setVoiceCommands },
+            value:voiceCommands,  setter:setVoiceCommands },
         ].map(({key,label,desc,value,setter})=>(
           <View style={styles.switchRow} key={key}>
             <View>
@@ -259,14 +289,13 @@ export default function SettingsScreen() {
                 setter(val);
                 await AsyncStorage.setItem(key,JSON.stringify(val));
 
-                /* notificar BottomNavBar quando muda “Comandos por Voz” */
+                /* informar BottomNavBar quando muda “Comandos por Voz” */
                 if (key==='voiceCommands')
                   DeviceEventEmitter.emit('voiceCommandsToggle', val);
 
                 haptic(); playClick();
               }}
-              trackColor={{false:'#444', true:'#fff'}}
-              thumbColor="#fff"
+              trackColor={{false:'#444', true:'#fff'}} thumbColor="#fff"
             />
           </View>
         ))}
@@ -279,7 +308,7 @@ export default function SettingsScreen() {
   );
 }
 
-/* ─────────── estilos ─────────── */
+/* ---------- estilos ---------- */
 const styles = StyleSheet.create({
   container:{ flex:1, backgroundColor:'#191919' },
 
