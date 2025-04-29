@@ -35,7 +35,7 @@ export default function InfoScreen() {
   };
 
   const faqs = [
-    { question: 'Como posso ativar o modo de alto contraste?', answer: 'Vai até às Definições > Tema Alto Contraste e escolhe a opção desejada.' },
+    { question: 'Como posso alterar o tamanho do texto?', answer: 'Vai até às Definições > Tamanho Do Texto e altere para a opção desejada.' },
     { question: 'A app suporta comandos por voz?',             answer: 'Sim, podes ativar nas Definições > Comandos por Voz.' },
     { question: 'Como altero o idioma da app?',                answer: 'Nas Definições, toca em Idioma e escolhe o teu idioma preferido.' },
   ];
