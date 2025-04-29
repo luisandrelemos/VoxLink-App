@@ -1,18 +1,21 @@
-import React, { useState, useRef } from 'react';
+/* app/components/BottomNavBar.tsx */
+import React, { useState, useRef, useEffect } from 'react';
 import {
   View,
   Image,
   StyleSheet,
   TouchableOpacity,
-  Alert,
+  TouchableWithoutFeedback,
   Animated,
   Easing,
   Dimensions,
   BackHandler,
-  TouchableWithoutFeedback,
+  Alert,
+  DeviceEventEmitter,
 } from 'react-native';
-import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useRouter, usePathname } from 'expo-router';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
 import useHaptics from '../../utils/useHaptics';
 import { useSound } from '../../context/SoundContext';
 import { listenAndRecognize, cancelRecording } from '../../utils/VoiceAssistant';
@@ -20,126 +23,126 @@ import { getVoiceCommand } from '../../utils/voiceCommands';
 
 const { width, height } = Dimensions.get('window');
 
+/* ──────────────────────────────────────────
+   Ícones fixos da barra
+────────────────────────────────────────── */
+const icons = {
+  home:     require('../../assets/images/nav-home.png'),
+  profile:  require('../../assets/images/nav-profile.png'),
+  settings: require('../../assets/images/nav-settings.png'),
+  info:     require('../../assets/images/nav-info.png'),
+} as const;
+
+/* rotas válidas reconhecidas pela expo-router  */
+type AppRoute = '/home' | '/account' | '/settings' | '/info';
+
+/* ──────────────────────────────────────────
+   Componente principal
+────────────────────────────────────────── */
 export default function BottomNavBar() {
-  const router = useRouter();
-  const pathname = usePathname();
-  const triggerHaptic = useHaptics();
+  /* helpers de navegação, som e vibração */
+  const router        = useRouter();
+  const pathname      = usePathname();
+  const haptic        = useHaptics();
   const { playClick } = useSound();
+  const isActive = (p: string) => pathname === p;
 
-  const isActive = (path: string) => pathname === path;
-
-  const [voiceActive, setVoiceActive] = useState(false);
+  /* estado do assistente e da animação */
+  const [voiceActive,   setVoiceActive]   = useState(false);
   const [forceCanceled, setForceCanceled] = useState(false);
-  const scaleAnim = useRef(new Animated.Value(1)).current;
+
+  const scaleAnim   = useRef(new Animated.Value(1)).current;
   const opacityAnim = useRef(new Animated.Value(0)).current;
 
-  const startSiriAnimation = () => {
+  /* switch “Comandos por Voz” vindo das Definições */
+  const [voiceEnabled, setVoiceEnabled] = useState<boolean>(true);
+
+  /* lê preferência e subscreve alterações */
+  useEffect(() => {
+    (async () => {
+      const stored = await AsyncStorage.getItem('voiceCommands');
+      setVoiceEnabled(stored !== 'false');      // default ON
+    })();
+
+    const sub = DeviceEventEmitter.addListener('voiceCommandsToggle', (val: boolean) => {
+      setVoiceEnabled(val);
+    });
+    return () => sub.remove();
+  }, []);
+
+  /* ───── animação do overlay ───── */
+  const startAnim = () => {
     setVoiceActive(true);
     setForceCanceled(false);
-    Animated.timing(opacityAnim, {
-      toValue: 1,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
-
+    Animated.timing(opacityAnim, { toValue: 1, duration: 300, useNativeDriver: true }).start();
     Animated.loop(
       Animated.sequence([
-        Animated.timing(scaleAnim, {
-          toValue: 1.2,
-          duration: 700,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
-        Animated.timing(scaleAnim, {
-          toValue: 1,
-          duration: 700,
-          easing: Easing.inOut(Easing.ease),
-          useNativeDriver: true,
-        }),
+        Animated.timing(scaleAnim, { toValue: 1.2, duration: 700, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
+        Animated.timing(scaleAnim, { toValue: 1.0, duration: 700, easing: Easing.inOut(Easing.ease), useNativeDriver: true }),
       ])
     ).start();
   };
 
-  const stopSiriAnimation = async () => {
+  const stopAnim = async () => {
     setVoiceActive(false);
     setForceCanceled(true);
     scaleAnim.stopAnimation();
     scaleAnim.setValue(1);
-    Animated.timing(opacityAnim, {
-      toValue: 0,
-      duration: 300,
-      useNativeDriver: true,
-    }).start();
+    Animated.timing(opacityAnim, { toValue: 0, duration: 300, useNativeDriver: true }).start();
     await cancelRecording();
   };
 
+  /* funções rápidas chamadas por comandos de voz */
   const toggleSound = async () => {
-    try {
-      const current = await AsyncStorage.getItem('feedbackSound');
-      const newValue = current !== 'true';
-      await AsyncStorage.setItem('feedbackSound', JSON.stringify(newValue));
-    } catch (e) {
-      console.error('Erro ao alternar o som:', e);
-    }
+    const cur = await AsyncStorage.getItem('feedbackSound');
+    await AsyncStorage.setItem('feedbackSound', JSON.stringify(cur !== 'true'));
   };
-  
   const toggleVibration = async () => {
-    try {
-      const current = await AsyncStorage.getItem('hapticFeedback');
-      const newValue = current !== 'true';
-      await AsyncStorage.setItem('hapticFeedback', JSON.stringify(newValue));
-    } catch (e) {
-      console.error('Erro ao alternar a vibração:', e);
-    }
-  };  
+    const cur = await AsyncStorage.getItem('hapticFeedback');
+    await AsyncStorage.setItem('hapticFeedback', JSON.stringify(cur !== 'true'));
+  };
 
+  /* handler do logótipo – abre o assistente */
   const handleVoiceCommand = async () => {
-    if (voiceActive) {
-      await stopSiriAnimation();
+    if (!voiceEnabled) {           // assistente desativado nas Definições
+      haptic(); playClick();
       return;
     }
 
-    triggerHaptic();
-    playClick();
-    startSiriAnimation();
+    if (voiceActive) { await stopAnim(); return; }
 
+    haptic(); playClick(); startAnim();
     try {
       const result = await listenAndRecognize();
-      await stopSiriAnimation();
+      await stopAnim();
 
       if (forceCanceled || !result) return;
 
-      const commandRecognized = getVoiceCommand(result, router, toggleSound, toggleVibration);
-
-      if (!commandRecognized) {
-        Alert.alert('Comando não reconhecido', `Comando: "${result}"`);
-      }
+      const ok = getVoiceCommand(result, router, toggleSound, toggleVibration);
+      if (!ok) Alert.alert('Comando não reconhecido', `Comando: "${result}"`);
     } catch (err) {
-      await stopSiriAnimation();
-      if (!forceCanceled) {
+      await stopAnim();
+      if (!forceCanceled)
         Alert.alert('Erro', 'Ocorreu um problema com o assistente de voz.');
-        console.error('Erro no assistente de voz:', err);
-      }
     }
   };
 
-  React.useEffect(() => {
-    const backAction = () => {
-      if (voiceActive) {
-        stopSiriAnimation();
-        return true;
-      }
+  /* botão BACK (Android) fecha o overlay */
+  useEffect(() => {
+    const sub = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (voiceActive) { stopAnim(); return true; }
       return false;
-    };
-    const backHandler = BackHandler.addEventListener('hardwareBackPress', backAction);
-    return () => backHandler.remove();
+    });
+    return () => sub.remove();
   }, [voiceActive]);
 
+  /* ───── UI ───── */
   return (
     <>
+      {/* overlay + círculo pulsante */}
       {voiceActive && (
-        <TouchableWithoutFeedback onPress={stopSiriAnimation}>
-          <Animated.View style={[styles.voiceOverlay, { opacity: opacityAnim }]}>            
+        <TouchableWithoutFeedback onPress={stopAnim}>
+          <Animated.View style={[styles.voiceOverlay, { opacity: opacityAnim }]}>
             <Animated.Image
               source={require('../../assets/images/logo.png')}
               style={[styles.voiceLogo, { transform: [{ scale: scaleAnim }] }]}
@@ -148,81 +151,59 @@ export default function BottomNavBar() {
         </TouchableWithoutFeedback>
       )}
 
+      {/* barra de navegação */}
       <View style={styles.navBar}>
-        <TouchableOpacity onPress={() => { if (!isActive('/home')) { triggerHaptic(); playClick(); router.replace('/home'); } }}>
-          <View style={styles.navItem}>
-            <Image source={require('../../assets/images/nav-home.png')} style={[styles.navIcon, isActive('/home') && styles.active]} />
-            {isActive('/home') && <View style={styles.navIndicator} />}
-          </View>
+        <NavBtn route="/home"     icon="home"    />
+        <NavBtn route="/account"  icon="profile" />
+
+        {/* logótipo - assistente */}
+        <TouchableOpacity onPress={handleVoiceCommand} activeOpacity={voiceEnabled ? 0.7 : 1}>
+          <Image
+            source={require('../../assets/images/logo.png')}
+            style={[styles.navLogo, !voiceEnabled && { opacity: 0.35 }]}
+          />
         </TouchableOpacity>
 
-        <TouchableOpacity onPress={() => { if (!isActive('/account')) { triggerHaptic(); playClick(); router.replace('/account'); } }}>
-          <View style={styles.navItem}>
-            <Image source={require('../../assets/images/nav-profile.png')} style={[styles.navIcon, isActive('/account') && styles.active]} />
-            {isActive('/account') && <View style={styles.navIndicator} />}
-          </View>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={handleVoiceCommand}>
-          <Image source={require('../../assets/images/logo.png')} style={styles.navLogo} />
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => { if (!isActive('/settings')) { triggerHaptic(); playClick(); router.replace('/settings'); } }}>
-          <View style={styles.navItem}>
-            <Image source={require('../../assets/images/nav-settings.png')} style={[styles.navIcon, isActive('/settings') && styles.active]} />
-            {isActive('/settings') && <View style={styles.navIndicator} />}
-          </View>
-        </TouchableOpacity>
-
-        <TouchableOpacity onPress={() => { if (!isActive('/info')) { triggerHaptic(); playClick(); router.replace('/info'); } }}>
-          <View style={styles.navItem}>
-            <Image source={require('../../assets/images/nav-info.png')} style={[styles.navIcon, isActive('/info') && styles.active]} />
-            {isActive('/info') && <View style={styles.navIndicator} />}
-          </View>
-        </TouchableOpacity>
+        <NavBtn route="/settings" icon="settings" />
+        <NavBtn route="/info"     icon="info"     />
       </View>
     </>
   );
+
+  /* ───── sub-componente botão de navegação ───── */
+  function NavBtn({ route, icon }: { route: AppRoute; icon: keyof typeof icons }) {
+    const active = isActive(route);
+    return (
+      <TouchableOpacity onPress={() => { if (!active) { haptic(); playClick(); router.replace(route); } }}>
+        <View style={styles.navItem}>
+          <Image source={icons[icon]} style={[styles.navIcon, active && styles.active]} />
+          {active && <View style={styles.navIndicator} />}
+        </View>
+      </TouchableOpacity>
+    );
+  }
 }
 
+/* ───── estilos ───── */
 const styles = StyleSheet.create({
   navBar: {
     position: 'absolute',
     bottom: 0,
-    backgroundColor: '#353535',
     width: '100%',
     height: 60,
+    backgroundColor: '#353535',
     borderTopLeftRadius: 15,
     borderTopRightRadius: 15,
     flexDirection: 'row',
     justifyContent: 'space-around',
     alignItems: 'center',
   },
-  navItem: {
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  navIcon: {
-    width: 30,
-    height: 30,
-    tintColor: '#fff',
-    resizeMode: 'contain',
-  },
-  navLogo: {
-    width: 55,
-    height: 55,
-    resizeMode: 'contain',
-  },
-  active: {
-    tintColor: '#fff',
-  },
-  navIndicator: {
-    width: 6,
-    height: 6,
-    backgroundColor: '#fff',
-    borderRadius: 3,
-    marginTop: 4,
-  },
+  navItem:  { alignItems: 'center', justifyContent: 'center' },
+  navIcon:  { width: 30, height: 30, tintColor: '#fff', resizeMode: 'contain' },
+  navLogo:  { width: 55, height: 55, resizeMode: 'contain' },
+  active:   { tintColor: '#fff' },
+  navIndicator: { width: 6, height: 6, backgroundColor: '#fff', borderRadius: 3, marginTop: 4 },
+
   voiceOverlay: {
     position: 'absolute',
     width,
@@ -233,9 +214,5 @@ const styles = StyleSheet.create({
     paddingBottom: 90,
     zIndex: 10,
   },
-  voiceLogo: {
-    width: 80,
-    height: 80,
-    resizeMode: 'contain',
-  },
+  voiceLogo: { width: 80, height: 80, resizeMode: 'contain' },
 });

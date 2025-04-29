@@ -1,73 +1,89 @@
+// app/utils/VoiceAssistant.ts
 import { Audio } from 'expo-av';
 import { transcribeAudio } from './googleSTT';
 
-let currentRecording: Audio.Recording | null = null;
-let forceCanceled = false;
-let interval: NodeJS.Timeout | null = null;
+let currentRecording : Audio.Recording | null = null;
+let recordingBusy   = false;                  // ← mutex global
+let forceCanceled   = false;
+let meterInterval  : NodeJS.Timeout | null = null;
 
+/* ─────────── grava + STT ─────────── */
 export async function listenAndRecognize(): Promise<string | null> {
+  /* se outra chamada já está a preparar/gravando devolvemos null      */
+  if (recordingBusy) return null;
+
+  recordingBusy = true;
   forceCanceled = false;
+
   try {
+    /* permissões microfone */
     const { granted } = await Audio.requestPermissionsAsync();
     if (!granted) throw new Error('Sem permissão para usar o microfone.');
 
-    await Audio.setAudioModeAsync({ allowsRecordingIOS: true, playsInSilentModeIOS: true });
-
-    const { recording } = await Audio.Recording.createAsync({
-      ...Audio.RecordingOptionsPresets.HIGH_QUALITY,
-      isMeteringEnabled: true, // Habilita medição de volume
+    await Audio.setAudioModeAsync({
+      allowsRecordingIOS: true,
+      playsInSilentModeIOS: true,
     });
 
+    /* inicia nova gravação */
+    const { recording } = await Audio.Recording.createAsync({
+      ...Audio.RecordingOptionsPresets.HIGH_QUALITY,
+      isMeteringEnabled: true,
+    });
     currentRecording = recording;
 
-    let silentCount = 0;
-    interval = setInterval(async () => {
-      const status = await recording.getStatusAsync();
+    /* detecta silêncio para parar automaticamente */
+    let silent = 0;
+    meterInterval = setInterval(async () => {
+      const status: any = await recording.getStatusAsync();
       if (!status.isRecording) return;
 
-      const meter = (status as any).metering ?? -160;
-      if (meter < -40) {
-        silentCount++;
-      } else {
-        silentCount = 0;
-      }
+      /* -40 dB ≈ silêncio */
+      silent = (status.metering ?? -160) < -40 ? silent + 1 : 0;
 
-      if (silentCount >= 3) { // 1.5s de silêncio (500ms x 3)
-        clearInterval(interval!);
+      if (silent >= 3) {                 // ≈ 1.5 s (3 × 500 ms)
+        clearInterval(meterInterval!);
         await recording.stopAndUnloadAsync();
         currentRecording = null;
       }
     }, 500);
 
-    // Espera o fim da gravação
+    /* espera terminar (silêncio ou cancelManual) */
     while ((await recording.getStatusAsync()).isRecording) {
       if (forceCanceled) return null;
-      await new Promise((res) => setTimeout(res, 100));
+      await new Promise(r => setTimeout(r, 100));
     }
 
     const uri = recording.getURI();
     if (!uri) return null;
 
+    /* transcreve */
     const text = await transcribeAudio(uri, 'auto');
     return text;
   } catch (err) {
     if (!forceCanceled) console.error('Erro no assistente de voz:', err);
     return null;
+  } finally {
+    /* liberta mutex em qualquer cenário */
+    recordingBusy = false;
   }
 }
 
+/* ─────────── cancela gravação ─────────── */
 export async function cancelRecording() {
   forceCanceled = true;
+
   try {
-    if (interval) clearInterval(interval);
+    if (meterInterval) clearInterval(meterInterval);
+
     if (currentRecording) {
       const status = await currentRecording.getStatusAsync();
-      if (status.isRecording) {
-        await currentRecording.stopAndUnloadAsync();
-      }
+      if (status.isRecording) await currentRecording.stopAndUnloadAsync();
       currentRecording = null;
     }
   } catch (e) {
     console.warn('Erro ao cancelar gravação:', e);
+  } finally {
+    recordingBusy = false;               // devolve lock
   }
 }
