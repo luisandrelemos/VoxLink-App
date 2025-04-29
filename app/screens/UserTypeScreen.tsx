@@ -67,9 +67,14 @@ export default function UserTypeScreen() {
   async function handleContinue() {
     if (!selected) return;
     const chosen  = userTypes.find(u => u.key === selected)!;
-    const toStore = { label: chosen.title, icon: chosen.icon };
-    await AsyncStorage.setItem('selectedUserType', JSON.stringify(toStore));
-    triggerHaptic(); click();
+    
+    await AsyncStorage.setItem(
+      'selectedUserType',
+      JSON.stringify({ label: chosen.title })
+    );
+
+    triggerHaptic(); 
+    click();
     router.replace('/home');
   }
 
