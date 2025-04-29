@@ -30,6 +30,7 @@ const userTypes = [
   { label: 'Cego', icon: require('../../assets/images/icon-blind.png') },
   { label: 'Surdo', icon: require('../../assets/images/icon-deaf.png') },
   { label: 'Mudo', icon: require('../../assets/images/icon-mute.png') },
+  { label: 'Outros', icon: require('../../assets/images/icon-others.png') },
 ];
 
 /* Escalas: 0 = pequeno, 1 = normal, 2 = grande */
@@ -312,11 +313,12 @@ const styles = StyleSheet.create({
     resizeMode: 'contain',
     tintColor: '#fff',
   },
-  optionIcon: {
+  optionIcon: { 
     width: 20,
     height: 20,
     marginRight: 10,
     resizeMode: 'contain',
+    tintColor: '#fff',  
   },
   sliderTrack: {
     flexDirection: 'row',
