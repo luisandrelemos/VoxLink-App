@@ -6,11 +6,16 @@ A VoxLink é uma aplicação móvel desenvolvida com **React Native + Expo**, pe
 
 ## 📱 Funcionalidades
 
-- 🗣️ **Texto para Voz (TTS)**Converte texto escrito em fala, com seleção de idioma, voz e velocidade.
-- 🎤 **Voz para Texto (STT)**Transcreve fala automaticamente com deteção de silêncio e tradução integrada.
-- ⚡ **Comunicação Rápida**Mensagens pré-definidas e campo de escrita livre para comunicar rapidamente.
-- 🧠 **Comandos por Voz**Navegação por voz: “abrir definições”, “ativar som”, “ler texto”, etc.
-- 🛠️ **Definições de Acessibilidade**Tema, idioma, vibração, som, tipo de utilizador e tamanho da fonte ajustáveis.
+- 🗣️ **Texto para Voz (TTS)** 
+   Converte texto escrito em fala, com seleção de idioma, voz e velocidade.
+- 🎤 **Voz para Texto (STT)** 
+   Transcreve fala automaticamente com deteção de silêncio e tradução integrada.
+- ⚡ **Comunicação Rápida** 
+   Mensagens pré-definidas e campo de escrita livre para comunicar rapidamente.
+- 🧠 **Comandos por Voz** 
+   Navegação por voz: “abrir definições”, “ativar som”, “ler texto”, etc.
+- 🛠️ **Definições de Acessibilidade** 
+   Tema, idioma, vibração, som, tipo de utilizador e tamanho da fonte ajustáveis.
 - 👤 **Perfil do Utilizador**
   Edição de nome, imagem e palavra-passe com autenticação Firebase.
 
