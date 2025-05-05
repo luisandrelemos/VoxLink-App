@@ -4,13 +4,12 @@
     "slug": "VoxLink",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
+    "icon": "./assets/images/logo.png",
+
     "scheme": "myapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
-    "ios": {
-      "supportsTablet": true
-    },
+
     "android": {
       "package": "com.voxlink.app",
       "googleServicesFile": "./google-services.json",
@@ -19,32 +18,31 @@
         "MODIFY_AUDIO_SETTINGS"
       ],
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
+        "foregroundImage": "./assets/images/logo.png",
+        "backgroundColor": "#ffffff00"
       }
     },
+
+    "ios": {
+      "supportsTablet": true
+    },
+
     "web": {
       "bundler": "metro",
       "output": "static",
       "favicon": "./assets/images/favicon.png"
     },
+
     "plugins": [
       "expo-router",
-      [
-        "expo-splash-screen",
-        {
-          "image": "./assets/images/splash-icon.png",
-          "imageWidth": 200,
-          "resizeMode": "contain",
-          "backgroundColor": "#ffffff"
-        }
-      ],
       "expo-font",
       "expo-localization"
     ],
+
     "experiments": {
       "typedRoutes": true
     },
+
     "extra": {
       "googleTtsKey": "***Paste API Here***",
       "router": {
