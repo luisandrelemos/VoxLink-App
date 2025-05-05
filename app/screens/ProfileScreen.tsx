@@ -1,35 +1,50 @@
 import React, { useEffect, useState } from 'react';
 import {
-  View, Text, StyleSheet, Image, TouchableOpacity, StatusBar,
-  Modal, TextInput, Alert
+  View,
+  StyleSheet,
+  Image,
+  TouchableOpacity,
+  StatusBar,
+  Modal,
+  TextInput,
+  Alert
 } from 'react-native';
 import BottomNavBar from '../components/BottomNavBar';
 import * as ImagePicker from 'expo-image-picker';
-import { getAuth, signOut, updateProfile, updatePassword, reauthenticateWithCredential, EmailAuthProvider } from 'firebase/auth';
+import {
+  getAuth,
+  signOut,
+  updateProfile,
+  updatePassword,
+  reauthenticateWithCredential,
+  EmailAuthProvider
+} from 'firebase/auth';
 import { useRouter } from 'expo-router';
-import useHaptics from '../../utils/useHaptics';
+import { useTranslation } from 'react-i18next';
+import useHaptics  from '../../utils/useHaptics';
 import { useSound } from '../../context/SoundContext';
-import ScaledText from '../components/ScaledText';
+import ScaledText   from '../components/ScaledText';
 
 export default function ProfileScreen() {
-  const router = useRouter();
-  const auth = getAuth();
+  const { t }       = useTranslation();
+  const router      = useRouter();
+  const auth        = getAuth();
   const currentUser = auth.currentUser;
   const triggerHaptic = useHaptics();
   const { playClick } = useSound();
 
-  const [user, setUser] = useState<{ name?: string; email: string; photoURL?: string } | null>(null);
-  const [isModalVisible, setModalVisible] = useState(false);
-  const [newName, setNewName] = useState('');
-  const [newPassword, setNewPassword] = useState('');
+  const [user, setUser] = useState<{ name?:string; email:string; photoURL?:string }|null>(null);
+  const [modalVisible, setModalVisible] = useState(false);
+  const [newName, setNewName]           = useState('');
   const [currentPassword, setCurrentPassword] = useState('');
-  const [imageUri, setImageUri] = useState<string | null>(null);
+  const [newPassword, setNewPassword]         = useState('');
+  const [imageUri, setImageUri]               = useState<string|null>(null);
 
   useEffect(() => {
     if (currentUser) {
       setUser({
-        name: currentUser.displayName || 'Utilizador',
-        email: currentUser.email || '',
+        name:     currentUser.displayName || t('profile.defaultName'),
+        email:    currentUser.email || '',
         photoURL: currentUser.photoURL ?? undefined
       });
     }
@@ -39,58 +54,55 @@ export default function ProfileScreen() {
     const result = await ImagePicker.launchImageLibraryAsync({
       mediaTypes: ImagePicker.MediaTypeOptions.Images,
       allowsEditing: true,
-      aspect: [1, 1],
-      quality: 0.6,
+      aspect: [1,1],
+      quality: 0.6
     });
-
     if (!result.canceled) {
-      const selectedUri = result.assets[0].uri;
-      setImageUri(selectedUri);
+      setImageUri(result.assets[0].uri);
     }
   };
 
-  const handleSaveChanges = async () => {
+  const saveChanges = async () => {
     try {
       if (!currentUser) return;
 
       if (newName || imageUri) {
         await updateProfile(currentUser, {
           displayName: newName || currentUser.displayName,
-          photoURL: imageUri || currentUser.photoURL,
+          photoURL:    imageUri || currentUser.photoURL
         });
       }
 
       if (newPassword) {
         if (!currentPassword) {
-          Alert.alert('Erro', 'Introduz a tua password atual para confirmar.');
+          Alert.alert(t('profile.error'), t('profile.needCurrentPassword'));
           return;
         }
-
-        const credential = EmailAuthProvider.credential(currentUser.email!, currentPassword);
-        await reauthenticateWithCredential(currentUser, credential);
-
+        const cred = EmailAuthProvider.credential(currentUser.email!, currentPassword);
+        await reauthenticateWithCredential(currentUser, cred);
         await updatePassword(currentUser, newPassword);
       }
 
-      Alert.alert('Sucesso', 'Dados atualizados com sucesso!');
+      Alert.alert(t('profile.success'), t('profile.updated'));
       setModalVisible(false);
-      setNewName('');
-      setNewPassword('');
-      setCurrentPassword('');
+      setNewName(''); setCurrentPassword(''); setNewPassword('');
       setUser({
-        name: currentUser.displayName || '',
-        email: currentUser.email || '',
+        name:     currentUser.displayName || '',
+        email:    currentUser.email || '',
         photoURL: currentUser.photoURL ?? undefined
       });
-
-    } catch (error: any) {
-      Alert.alert('Erro', error.message);
+    } catch (err:any) {
+      Alert.alert(t('profile.error'), err.message);
     }
   };
 
-  const handleLogout = async () => {
+  const logout = async () => {
     await signOut(auth);
     router.replace('/initialmenuscreen');
+  };
+
+  const onPress = (cb:()=>void) => {
+    triggerHaptic(); playClick(); cb();
   };
 
   return (
@@ -99,64 +111,82 @@ export default function ProfileScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => { router.push('/home'); triggerHaptic(); playClick();}}>
-          <ScaledText base={16} style={styles.backText}>← Minha Conta</ScaledText>
+        <TouchableOpacity onPress={()=>onPress(()=>router.push('/home'))}>
+          <ScaledText base={16} style={styles.backText}>
+            ← {t('profile.back')}
+          </ScaledText>
         </TouchableOpacity>
-        <Image source={require('../../assets/images/logo-header.png')} style={styles.logo} />
+        <Image source={require('../../assets/images/logo-header.png')} style={styles.logo}/>
       </View>
 
-      {/* Conteúdo */}
+      {/* Perfil */}
       <View style={styles.content}>
         <Image
-          source={
-            imageUri
-              ? { uri: imageUri }
-              : user?.photoURL
-              ? { uri: user.photoURL }
-              : require('../../assets/images/profile-placeholder.png')
+          source={ imageUri ? { uri:imageUri }
+            : user?.photoURL ? { uri:user.photoURL }
+            : require('../../assets/images/profile-placeholder.png')
           }
           style={styles.avatar}
         />
-        <ScaledText base={18} style={styles.name}>{user?.name}</ScaledText>
-        <ScaledText base={14} style={styles.email}>{user?.email}</ScaledText>
+        <ScaledText base={18} style={styles.name}>
+          {user?.name}
+        </ScaledText>
+        <ScaledText base={14} style={styles.email}>
+          {user?.email}
+        </ScaledText>
 
-        <TouchableOpacity style={styles.buttonOutline} onPress={() => { setModalVisible(true); triggerHaptic(); playClick();}}>
-          <ScaledText base={18} style={styles.buttonOutlineText}>Editar Perfil</ScaledText>
+        <TouchableOpacity
+          style={styles.buttonOutline}
+          onPress={() => onPress(() => setModalVisible(true))}
+        >
+          <ScaledText base={18} style={styles.buttonOutlineText}>
+            {t('profile.edit')}
+          </ScaledText>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.buttonOutline}
-          onPress={() => { triggerHaptic(); playClick(); router.push('/usertypescreen'); }}>
-          <ScaledText base={18} style={styles.buttonOutlineText}>Tipo de Utilizador</ScaledText>
+        <TouchableOpacity
+          style={styles.buttonOutline}
+          onPress={() => onPress(() => router.push('/usertypescreen'))}
+        >
+          <ScaledText base={18} style={styles.buttonOutlineText}>
+            {t('profile.userType')}
+          </ScaledText>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.buttonSolid} onPress={() => { handleLogout(); triggerHaptic(); playClick();}}>
-          <ScaledText base={18} style={styles.buttonSolidText}>Terminar Sessão</ScaledText>
+        <TouchableOpacity
+          style={styles.buttonSolid}
+          onPress={() => onPress(logout)}
+        >
+          <ScaledText base={18} style={styles.buttonSolidText}>
+            {t('profile.logout')}
+          </ScaledText>
         </TouchableOpacity>
       </View>
 
-      {/* Modal de Edição */}
-      <Modal visible={isModalVisible} transparent animationType="slide">
+      {/* Modal editar */}
+      <Modal visible={modalVisible} transparent animationType="slide">
         <View style={styles.modalContainer}>
           <View style={styles.modalContent}>
-            <ScaledText base={18} style={styles.modalTitle}>Editar Perfil</ScaledText>
+            <ScaledText base={18} style={styles.modalTitle}>
+              {t('profile.edit')}
+            </ScaledText>
 
-            <TouchableOpacity onPress={() => { pickImage(); triggerHaptic(); playClick();}}>
+            <TouchableOpacity onPress={pickImage}>
               <Image
-                source={
-                  imageUri
-                    ? { uri: imageUri }
-                    : user?.photoURL
-                    ? { uri: user.photoURL }
-                    : require('../../assets/images/profile-placeholder.png')
+                source={ imageUri ? { uri:imageUri }
+                  : user?.photoURL ? { uri:user.photoURL }
+                  : require('../../assets/images/profile-placeholder.png')
                 }
                 style={styles.avatar}
               />
-              <ScaledText base={13} style={styles.editPhoto}>Alterar Foto</ScaledText>
+              <ScaledText base={13} style={styles.editPhoto}>
+                {t('profile.changePhoto')}
+              </ScaledText>
             </TouchableOpacity>
 
             <TextInput
               style={styles.input}
-              placeholder="Novo nome"
+              placeholder={t('profile.newName')}
               placeholderTextColor="#000"
               value={newName}
               onChangeText={setNewName}
@@ -164,7 +194,7 @@ export default function ProfileScreen() {
 
             <TextInput
               style={styles.input}
-              placeholder="Password atual"
+              placeholder={t('profile.currentPassword')}
               placeholderTextColor="#000"
               secureTextEntry
               value={currentPassword}
@@ -173,19 +203,26 @@ export default function ProfileScreen() {
 
             <TextInput
               style={styles.input}
-              placeholder="Nova password"
+              placeholder={t('profile.newPassword')}
               placeholderTextColor="#000"
               secureTextEntry
               value={newPassword}
               onChangeText={setNewPassword}
             />
 
-            <TouchableOpacity style={styles.buttonSolid} onPress={() => { handleSaveChanges(); triggerHaptic(); playClick();}}>
-              <ScaledText base={18} style={styles.buttonSolidText}>Guardar</ScaledText>
+            <TouchableOpacity style={styles.buttonSolid} onPress={saveChanges}>
+              <ScaledText base={18} style={styles.buttonSolidText}>
+                {t('profile.save')}
+              </ScaledText>
             </TouchableOpacity>
 
-            <TouchableOpacity onPress={() => { setModalVisible(false); triggerHaptic(); playClick();}} style={{ marginTop: 15 }}>
-              <ScaledText base={14} style={{ color: '#fff', fontFamily: 'Montserrat-Regular' }}>Cancelar</ScaledText>
+            <TouchableOpacity
+              style={{ marginTop:15 }}
+              onPress={() => onPress(()=>setModalVisible(false))}
+            >
+              <ScaledText base={14} style={{ color:'#fff', fontFamily:'Montserrat-Regular' }}>
+                {t('profile.cancel')}
+              </ScaledText>
             </TouchableOpacity>
           </View>
         </View>

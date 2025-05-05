@@ -1,7 +1,17 @@
 import React, { useState, useEffect } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity, StyleSheet, Image,
-  Switch, SafeAreaView, KeyboardAvoidingView, Platform, ScrollView, Alert
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  Switch,
+  SafeAreaView,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Alert,
 } from 'react-native';
 import { Entypo } from '@expo/vector-icons';
 import { signInWithEmailAndPassword, onAuthStateChanged } from 'firebase/auth';
@@ -9,8 +19,10 @@ import { auth } from '../../utils/firebaseConfig';
 import { useRouter } from 'expo-router';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import useHaptics from '../../utils/useHaptics';
+import { useTranslation } from 'react-i18next';
 
 export default function LoginScreen() {
+  const { t } = useTranslation();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [stayConnected, setStayConnected] = useState(false);
@@ -18,12 +30,12 @@ export default function LoginScreen() {
   const router = useRouter();
   const triggerHaptic = useHaptics();
 
-  // Verificar se o utilizador quer ficar conectado
+  // Mantém sessão se ativo
   useEffect(() => {
     async function checkStayConnected() {
-      const stayConnectedFlag = await AsyncStorage.getItem('stayConnected');
+      const flag = await AsyncStorage.getItem('stayConnected');
       onAuthStateChanged(auth, (user) => {
-        if (user && stayConnectedFlag === 'true') {
+        if (user && flag === 'true') {
           router.replace('/home');
         }
       });
@@ -31,7 +43,7 @@ export default function LoginScreen() {
     checkStayConnected();
   }, []);
 
-  // Login por email/password
+  // Efetua login
   async function handleLogin() {
     try {
       await signInWithEmailAndPassword(auth, email, password);
@@ -40,12 +52,20 @@ export default function LoginScreen() {
       } else {
         await AsyncStorage.removeItem('stayConnected');
       }
-      Alert.alert('Sucesso!', 'Login efetuado com sucesso!');
+      Alert.alert(t('login.successTitle'), t('login.successMessage'));
       router.replace('/home');
-    } catch (error: any) {
-      Alert.alert('Erro no login', error.message);
+    } catch (err: any) {
+      Alert.alert(t('login.errorTitle'), err.message);
     }
   }
+
+  const handleSocial = (provider: 'Google' | 'Facebook') => {
+    triggerHaptic();
+    Alert.alert(
+      t('login.notImplementedTitle'),
+      t('login.notImplemented', { provider })
+    );
+  };
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -53,30 +73,30 @@ export default function LoginScreen() {
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-          <Image
-            source={require('../../assets/images/logo.png')}
-            style={styles.logo}
-          />
-          <Text style={styles.title}>Olá de Novo!</Text>
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Image source={require('../../assets/images/logo.png')} style={styles.logo} />
+          <Text style={styles.title}>{t('login.title')}</Text>
 
-          {/* Campo Email */}
+          {/* Email */}
           <TextInput
             onFocus={triggerHaptic}
             style={styles.input}
-            placeholder="Email"
+            placeholder={t('login.emailPlaceholder')}
             placeholderTextColor="#000"
             value={email}
             onChangeText={setEmail}
             keyboardType="email-address"
           />
 
-          {/* Campo Password */}
+          {/* Password */}
           <View style={styles.passwordContainer}>
             <TextInput
               onFocus={triggerHaptic}
               style={styles.inputPassword}
-              placeholder="Password"
+              placeholder={t('login.passwordPlaceholder')}
               placeholderTextColor="#000"
               secureTextEntry={!showPassword}
               value={password}
@@ -88,13 +108,19 @@ export default function LoginScreen() {
                 triggerHaptic();
               }}
             >
-              <Entypo name={showPassword ? 'eye-with-line' : 'eye'} size={22} color="#888" />
+              <Entypo
+                name={showPassword ? 'eye-with-line' : 'eye'}
+                size={22}
+                color="#888"
+              />
             </TouchableOpacity>
           </View>
 
-          {/* Switch Ficar Conectado */}
+          {/* Stay connected */}
           <View style={styles.stayConnected}>
-            <Text style={styles.stayConnectedText}>Ficar Conectado</Text>
+            <Text style={styles.stayConnectedText}>
+              {t('login.stayConnected')}
+            </Text>
             <Switch
               value={stayConnected}
               onValueChange={(val) => {
@@ -106,7 +132,7 @@ export default function LoginScreen() {
             />
           </View>
 
-          {/* Botão Entrar Email/Password */}
+          {/* Login button */}
           <TouchableOpacity
             style={styles.loginButton}
             onPress={() => {
@@ -114,64 +140,65 @@ export default function LoginScreen() {
               handleLogin();
             }}
           >
-            <Text style={styles.loginButtonText}>Entrar</Text>
+            <Text style={styles.loginButtonText}>
+              {t('login.loginButton')}
+            </Text>
           </TouchableOpacity>
 
-          {/* Esqueceu Password */}
-          <TouchableOpacity onPress={() => {
-            triggerHaptic();
-          }}>
-            <Text style={styles.forgotPassword}>Esqueceu-se da Password?</Text>
+          {/* Forgot */}
+          <TouchableOpacity
+            onPress={() => {
+              triggerHaptic();
+              /* aqui podes navegar para reset */
+            }}
+          >
+            <Text style={styles.forgotPassword}>
+              {t('login.forgotPassword')}
+            </Text>
           </TouchableOpacity>
 
           {/* Divider */}
           <View style={styles.dividerContainer}>
             <View style={styles.line} />
-            <Text style={styles.orText}>ou</Text>
+            <Text style={styles.orText}>{t('login.or')}</Text>
             <View style={styles.line} />
           </View>
 
-          {/* Botões de Login Social */}
+          {/* Social */}
           <View style={styles.socialButtons}>
-            {/* Google (inativo, só visual) */}
-            <TouchableOpacity style={styles.socialButton} onPress={() => {
-              triggerHaptic();
-            }}>
+            <TouchableOpacity
+              style={styles.socialButton}
+              onPress={() => handleSocial('Google')}
+            >
               <Image
                 source={require('../../assets/images/google-icon.png')}
                 style={styles.icon}
               />
-              <Text style={styles.socialText}>Google</Text>
+              <Text style={styles.socialText}>{t('login.google')}</Text>
             </TouchableOpacity>
-
-            {/* Facebook (inativo) */}
-            <TouchableOpacity style={styles.socialButton} onPress={() => {
-              triggerHaptic();
-            }}>
+            <TouchableOpacity
+              style={styles.socialButton}
+              onPress={() => handleSocial('Facebook')}
+            >
               <Image
                 source={require('../../assets/images/facebook-icon.png')}
                 style={styles.icon}
               />
-              <Text style={styles.socialText}>Facebook</Text>
+              <Text style={styles.socialText}>{t('login.facebook')}</Text>
             </TouchableOpacity>
           </View>
 
-          <Text style={styles.footerText}>VoxLink</Text>
+          {/* Footer */}
+          <Text style={styles.footerText}>{t('login.footer')}</Text>
         </ScrollView>
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
 }
 
-// Estilos
 const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: '#191919',
-  },
-  container: {
-    flex: 1,
-  },
+  safeArea: { flex: 1, backgroundColor: '#191919' },
+  container: { flex: 1 },
   scrollContainer: {
     padding: 20,
     alignItems: 'center',
@@ -249,20 +276,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 20,
   },
-  line: {
-    flex: 1,
-    height: 1,
-    backgroundColor: '#555',
-  },
-  orText: {
-    color: '#aaa',
-    marginHorizontal: 8,
-    fontFamily: 'Montserrat-Regular',
-  },
-  socialButtons: {
-    flexDirection: 'row',
-    gap: 10,
-  },
+  line: { flex: 1, height: 1, backgroundColor: '#555' },
+  orText: { color: '#aaa', marginHorizontal: 8, fontFamily: 'Montserrat-Regular' },
+  socialButtons: { flexDirection: 'row', gap: 10 },
   socialButton: {
     flex: 1,
     backgroundColor: '#fff',
@@ -272,15 +288,8 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'center',
   },
-  icon: {
-    width: 20,
-    height: 20,
-    marginRight: 6,
-  },
-  socialText: {
-    color: '#000',
-    fontFamily: 'Montserrat-SemiBold',
-  },
+  icon: { width: 20, height: 20, marginRight: 6 },
+  socialText: { color: '#000', fontFamily: 'Montserrat-SemiBold' },
   footerText: {
     marginTop: 20,
     color: '#fff',
