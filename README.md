@@ -1,50 +1,89 @@
-# Welcome to your Expo app 👋
+# 🎙️ VoxLink – App de Acessibilidade Multissensorial
 
-This is an [Expo](https://expo.dev) project created with [`create-expo-app`](https://www.npmjs.com/package/create-expo-app).
+A VoxLink é uma aplicação móvel desenvolvida com **React Native + Expo**, pensada para facilitar a comunicação de pessoas com limitações **auditivas**, **visuais** e/ou **vocais**. Através de **voz-para-texto**, **texto-para-voz**, comandos por voz e uma interface acessível e intuitiva, a app promove inclusão digital para todos os perfis de utilizador.
 
-## Get started
+---
 
-1. Install dependencies
+## 📱 Funcionalidades
 
-   ```bash
-   npm install
-   ```
+- 🗣️ **Texto para Voz (TTS)**Converte texto escrito em fala, com seleção de idioma, voz e velocidade.
+- 🎤 **Voz para Texto (STT)**Transcreve fala automaticamente com deteção de silêncio e tradução integrada.
+- ⚡ **Comunicação Rápida**Mensagens pré-definidas e campo de escrita livre para comunicar rapidamente.
+- 🧠 **Comandos por Voz**Navegação por voz: “abrir definições”, “ativar som”, “ler texto”, etc.
+- 🛠️ **Definições de Acessibilidade**Tema, idioma, vibração, som, tipo de utilizador e tamanho da fonte ajustáveis.
+- 👤 **Perfil do Utilizador**
+  Edição de nome, imagem e palavra-passe com autenticação Firebase.
 
-2. Start the app
+---
 
-   ```bash
-    npx expo start
-   ```
+## ⚙️ Tecnologias Utilizadas
 
-In the output, you'll find options to open the app in a
+A aplicação foi desenvolvida com **React Native** e o ecossistema **Expo**. Utiliza **Firebase Authentication** e **Firestore** para gestão de utilizadores e dados. As funcionalidades de voz e tradução são suportadas pelas APIs da **Google Cloud** (Text-to-Speech, Speech-to-Text, Translation). Adicionalmente, foram usadas bibliotecas como:
 
-- [development build](https://docs.expo.dev/develop/development-builds/introduction/)
-- [Android emulator](https://docs.expo.dev/workflow/android-studio-emulator/)
-- [iOS simulator](https://docs.expo.dev/workflow/ios-simulator/)
-- [Expo Go](https://expo.dev/go), a limited sandbox for trying out app development with Expo
+- **expo-av**, **expo-speech** (áudio)
+- **i18n-js** (tradução)
+- **react-native-reanimated** (animações)
+- **AsyncStorage** (armazenamento local)
+- **expo-image-picker** (imagem de perfil)
 
-You can start developing by editing the files inside the **app** directory. This project uses [file-based routing](https://docs.expo.dev/router/introduction).
+---
 
-## Get a fresh project
+## 🚀 Como Executar a App
 
-When you're ready, run:
+### 1. Instalar dependências
 
 ```bash
-npm run reset-project
+npm install
 ```
 
-This command will move the starter code to the **app-example** directory and create a blank **app** directory where you can start developing.
+### 2. Iniciar a aplicação com Expo
 
-## Learn more
+```bash
+npx expo start
+```
 
-To learn more about developing your project with Expo, look at the following resources:
+Depois, podes abrir a app:
 
-- [Expo documentation](https://docs.expo.dev/): Learn fundamentals, or go into advanced topics with our [guides](https://docs.expo.dev/guides).
-- [Learn Expo tutorial](https://docs.expo.dev/tutorial/introduction/): Follow a step-by-step tutorial where you'll create a project that runs on Android, iOS, and the web.
+- Num emulador Android (Android Studio)
+- Num simulador iOS (Xcode)
+- No teu telemóvel com a app **Expo Go**
 
-## Join the community
+---
 
-Join our community of developers creating universal apps.
+## 🛠️ Configurações Necessárias
 
-- [Expo on GitHub](https://github.com/expo/expo): View our open source platform and contribute.
-- [Discord community](https://chat.expo.dev): Chat with Expo users and ask questions.
+No ficheiro `app.json`, garante que tens a chave da API Google:
+
+```json
+"extra": {
+  "googleTtsKey": "A_TUA_API_KEY_GOOGLE"
+}
+```
+
+---
+
+## 📂 Estrutura Base do Projeto
+
+```
+/app
+  /screens         → ecrãs principais (STT, TTS, FastText, etc.)
+  /components      → componentes reutilizáveis (navbar, textos, etc.)
+  /context         → contextos globais (auth, som, voz, fonte, etc.)
+  /utils           → lógica de TTS, STT, tradução e comandos de voz
+```
+
+---
+
+## 📄 Licença
+
+Este projeto foi desenvolvido no contexto académico da **UTAD** – Licenciatura em Engenharia Informática, unidade curricular **Interação Pessoa-Computador (2024/2025)**.
+
+---
+
+## 💬 Contacto
+
+Para sugestões ou contribuições, contacta os autores ou abre uma _issue_ neste repositório.
+
+---
+
+> Feito com ❤️ por  Luís Lemos
