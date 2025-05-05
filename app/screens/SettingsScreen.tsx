@@ -122,13 +122,20 @@ export default function SettingsScreen() {
   }, []);
 
   /* ---------- font slider ---------- */
-  const onSlide    = (val:number) => setSliderVal(val);            // move “livre”
-  const onRelease  = (val:number) => {
-    const step = roundStep(val);
-    setSliderVal(step);
-    setFontSizeMultiplier(stepToMult(step));
-    haptic(); playClick();
-  };
+  // Atualiza em tempo real o tamanho do texto
+  const onSlide = (val: number) => {
+     setSliderVal(val);
+     const step = roundStep(val);
+     setFontSizeMultiplier(stepToMult(step));
+   };
+  
+  // Só dispara feedback háptico e sonoro quando soltar
+  const onSlideComplete = (val: number) => {
+     const step = roundStep(val);
+     setSliderVal(step);
+     setFontSizeMultiplier(stepToMult(step));
+     haptic(); playClick();
+   };
 
   /* troca de idioma */
   const changeAppLanguage = async (code: string) => {
@@ -194,7 +201,7 @@ export default function SettingsScreen() {
             step={0.01}
             value={sliderVal}
             onValueChange={onSlide}
-            onSlidingComplete={onRelease}
+            onSlidingComplete={onSlideComplete}
             minimumTrackTintColor="#fff"
             maximumTrackTintColor="#444"
             thumbTintColor="#fff"
