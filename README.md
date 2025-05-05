@@ -2,7 +2,10 @@
 
 A VoxLink é uma aplicação móvel desenvolvida com **React Native + Expo**, pensada para facilitar a comunicação de pessoas com limitações **auditivas**, **visuais** e/ou **vocais**. Através de **voz-para-texto**, **texto-para-voz**, comandos por voz e uma interface acessível e intuitiva, a app promove inclusão digital para todos os perfis de utilizador.
 
+![VoxLink Showcase](assets/images/VoxLink.png)
+
 ---
+
 
 ## 📱 Funcionalidades
 
