@@ -1,0 +1,225 @@
+{
+  "initial": {
+    "title": "VoxLink",
+    "createAccount": "Create Account",
+    "googleLogin": "Sign in with Google",
+    "facebookLogin": "Sign in with Facebook",
+    "login": "Login",
+    "alertGoogle": "Google login not yet implemented",
+    "alertFacebook": "Facebook login not yet implemented"
+  },
+  
+  "login": {
+    "title": "Welcome Back!",
+    "emailPlaceholder": "Email",
+    "passwordPlaceholder": "Password",
+    "stayConnected": "Stay connected",
+    "loginButton": "Login",
+    "forgotPassword": "Forgot Password?",
+    "or": "or",
+    "google": "Google",
+    "facebook": "Facebook",
+    "successTitle": "Success!",
+    "successMessage": "Logged in successfully!",
+    "errorTitle": "Login Error",
+    "notImplementedTitle": "Not implemented",
+    "notImplemented": "{{provider}} not yet implemented",
+    "footer": "VoxLink"
+  },
+
+  "register": {
+    "title": "New here? Create an account!",
+    "namePlaceholder": "Name",
+    "emailPlaceholder": "Email",
+    "passwordPlaceholder": "Password",
+    "confirmPasswordPlaceholder": "Confirm Password",
+    "acceptTermsPrefix": "I accept the",
+    "termsLink": "Terms & Conditions",
+    "registerButton": "Sign Up",
+    "footer": "VoxLink",
+    "termsTitle": "Terms",
+    "termsMessage": "You must accept the Terms & Conditions to proceed.",
+    "errorTitle": "Error",
+    "passwordMismatch": "Passwords do not match!",
+    "successTitle": "Success",
+    "successMessage": "Account created successfully!",
+    "termsAndConditions": "Terms & Conditions",
+    "modalText": "1. Acceptance of Terms\nBy using VoxLink, you agree to these Terms & Conditions.\n\n2. App Purpose\nVoxLink aims to provide an accessible and inclusive experience.\n\n3. Responsible Use\nUsers must act ethically and responsibly.\n\n4. Privacy\nYour data will be handled confidentially.\n\n5. Updates\nWe may update these Terms at any time.\n\n6. Contact\nsupport@voxlink.app\n\nLast update: April 2025.",
+    "modalBack": "←",
+    "modalClose": "Close"
+  },
+
+  "home": {
+    "voiceToText": "Speech-to-Text",
+    "textToVoice": "Text-to-Speech",
+    "quickComms": "Quick Phrases",
+    "accessibility": "Accessibility"
+  },
+  
+  "profile": {
+    "back": "My Account",
+    "defaultName": "User",
+    "edit": "Edit Profile",
+    "userType": "User Type",
+    "logout": "Sign Out",
+    "changePhoto": "Change Photo",
+    "newName": "New name",
+    "currentPassword": "Current password",
+    "newPassword": "New password",
+    "save": "Save",
+    "cancel": "Cancel",
+    "success": "Success",
+    "updated": "Profile updated successfully!",
+    "error": "Error",
+    "needCurrentPassword": "Please enter your current password to confirm."
+  },
+
+  "userType": {
+    "heading": "Choose Your\nUser Profile",
+    "sub":     "Personalize your experience. You can change it later in Settings.",
+    "continue":"Continue",
+    "profiles": {
+      "Surdo":  {
+        "title":"Deaf",
+        "desc": "Enables captions, visual feedback\nand real-time text features (STT)."
+      },
+      "Cego":   {
+        "title":"Blind",
+        "desc": "Enables screen reader, voice feedback (TTS), larger text sizes and high contrast."
+      },
+      "Mudo":   {
+        "title":"Mute",
+        "desc": "Enables quick communication with predefined phrases,\ntext-to-speech and shortcuts."
+      },
+      "Outros": {
+        "title":"Others",
+        "desc": "Accesses all features in the standard way."
+      }
+    }
+  },
+
+  "settings": {
+    "back": "← Settings",
+    "language": "Language",
+    "chooseLanguage": "Choose language",
+    "textSize": "Text size",
+    "ttsVoice": "TTS voice",
+    "chooseVoice": "Choose voice",
+    "userType": "User type",
+    "chooseUserType": "Choose user type",
+    "soundFeedback": "Sound feedback",
+    "soundDesc": "Sounds on interactions",
+    "hapticFeedback": "Haptic feedback",
+    "hapticDesc": "Vibration on interactions",
+    "voiceCommands": "Voice commands",
+    "voiceDesc": "Enable assistant on logo tap",
+    "footer": "VoxLink\nVersion 1.0"
+  },
+  "voices": {
+    "Feminina": "Female",
+    "Masculina": "Male"
+  },
+  "users": {
+    "Cego": "Blind",
+    "Surdo": "Deaf",
+    "Mudo": "Mute",
+    "Outros": "Others"
+  },
+
+  "info": {
+    "back": "Information",
+
+    "about": {
+      "title": "About VoxLink",
+      "desc":  "VoxLink is an inclusive platform that connects users with different needs to accessible interfaces."
+    },
+
+    "accessibility": {
+      "title": "Accessibility",
+      "desc":  "Theme, text, haptic feedback and more to improve usability for all users.",
+      "btn":   "Go to Settings"
+    },
+
+    "faqTitle": "Frequently Asked Questions",
+    "faq1": { "q": "How can I change the text size?",    "a": "Go to Settings > Text Size and select your preference." },
+    "faq2": { "q": "Does the app support voice commands?", "a": "Yes, you can enable it in Settings > Voice Commands." },
+    "faq3": { "q": "How do I change the app language?",    "a": "In Settings, tap Language and choose your preferred language." },
+
+    "contacts": {
+      "title":   "Contacts",
+      "email":   "Email: suporte@voxlink.app",
+      "site":    "Website: www.voxlink.app",
+      "termsBtn": "View Terms & Conditions"
+    },
+
+    "terms": {
+      "title":   "Terms & Conditions",
+      "p1":      "1. Acceptance of Terms",
+      "p1_1":    "By using the VoxLink app, you agree to these Terms & Conditions.",
+      "p2":      "2. Purpose of the App",
+      "p2_1":    "VoxLink aims to provide an inclusive and accessible experience to all users, with features tailored to specific needs.",
+      "p3":      "3. Responsible Use",
+      "p3_1":    "Users agree to use the app ethically, respecting other users and provided resources.",
+      "p4":      "4. Privacy",
+      "p4_1":    "Data provided will be kept confidential. We collect only the information necessary to improve the app experience.",
+      "p5":      "5. Updates",
+      "p5_1":    "We reserve the right to modify these Terms at any time. Please review this section regularly.",
+      "p6":      "6. Contacts",
+      "p6_1":    "For questions, contact us at suporte@voxlink.app.",
+      "updated": "Last updated: April 2025.",
+      "close":   "Close"
+    }
+  },
+
+  "stt": {
+    "back": "← Speech-to-Text",
+    "placeholder": "Welcome to Speech-to-Text! Start recording...",
+    "permissionDeniedTitle": "Permission denied",
+    "permissionDeniedMessage": "You must allow microphone access.",
+    "listening": "👂 Listening...",
+    "transcribing": "✍🏽 Transcribing...",
+    "invalidAudio": "⚠️ Invalid audio.",
+    "noSpeechDetected": "⚠️ No speech detected.",
+    "translationError": "⚠️ Translation error.",
+    "processingError": "⚠️ Error processing audio.",
+    "chooseLanguage": "Choose language"
+  },
+
+  "tts": {
+    "back": "← Text-to-Speech",
+    "placeholder": "Type here…",
+    "voice": "Voice",
+    "chooseVoice": "Choose voice",
+    "language": "Language",
+    "chooseLanguage": "Choose language",
+    "speed": "Speed",
+    "convert": "Convert"
+  },
+  "languages": {
+    "pt": "Português (Portugal)",
+    "en": "English (US)",
+    "es": "Español (España)",
+    "fr": "Français (France)"
+  },
+  
+  "fast": {
+    "back": "← Quick Communication",
+    "quickMessages": [
+      "Hi,\nHow are you?",
+      "I need\nhelp",
+      "Good\nafternoon!",
+      "Shall\nwe go?",
+      "I need\na ride",
+      "Sorry",
+      "Thank\nyou",
+      "I'm\nhungry",
+      "Where\nis the restroom?"
+    ],
+    "freeWrite": "Free Write",
+    "placeholder": "Type Here",
+    "listen": "Listen",
+    "language": "Language",
+    "chooseLanguage": "Choose language",
+    "speed": "Speed"
+  }
+}

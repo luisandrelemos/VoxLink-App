@@ -1,15 +1,29 @@
 import React from 'react';
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, Image, StatusBar } from 'react-native';
+import {
+  View,
+  StyleSheet,
+  Image,
+  StatusBar,
+  TouchableOpacity,
+  Text,
+} from 'react-native';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import useHaptics from '../../utils/useHaptics';
 
 export default function InitialMenuScreen() {
-  const router = useRouter();
+  const router        = useRouter();
   const triggerHaptic = useHaptics();
+  const { t }         = useTranslation();
 
   const handleGoogleLogin = () => {
     triggerHaptic();
-    alert('Login com Google ainda não implementado');
+    alert(t('initial.alertGoogle'));
+  };
+
+  const handleFacebookLogin = () => {
+    triggerHaptic();
+    alert(t('initial.alertFacebook'));
   };
 
   return (
@@ -17,7 +31,7 @@ export default function InitialMenuScreen() {
       <StatusBar backgroundColor="#191919" barStyle="light-content" />
 
       <Image source={require('../../assets/images/logo.png')} style={styles.logo} />
-      <Text style={styles.title}>VoxLink</Text>
+      <Text style={styles.title}>{t('initial.title')}</Text>
 
       <TouchableOpacity
         style={styles.buttonOutline}
@@ -26,23 +40,19 @@ export default function InitialMenuScreen() {
           router.push('/register');
         }}
       >
-        <Text style={styles.buttonOutlineText}>Criar Conta</Text>
+        <Text style={styles.buttonOutlineText}>
+          {t('initial.createAccount')}
+        </Text>
       </TouchableOpacity>
 
       <TouchableOpacity style={styles.socialButton} onPress={handleGoogleLogin}>
         <Image source={require('../../assets/images/google-icon.png')} style={styles.icon} />
-        <Text style={styles.socialText}>Entrar Com Google</Text>
+        <Text style={styles.socialText}>{t('initial.googleLogin')}</Text>
       </TouchableOpacity>
 
-      <TouchableOpacity
-        style={styles.socialButton}
-        onPress={() => {
-          triggerHaptic();
-          alert('Login com Facebook ainda não implementado');
-        }}
-      >
+      <TouchableOpacity style={styles.socialButton} onPress={handleFacebookLogin}>
         <Image source={require('../../assets/images/facebook-icon.png')} style={styles.icon} />
-        <Text style={styles.socialText}>Entrar Com Facebook</Text>
+        <Text style={styles.socialText}>{t('initial.facebookLogin')}</Text>
       </TouchableOpacity>
 
       <TouchableOpacity
@@ -52,7 +62,7 @@ export default function InitialMenuScreen() {
           router.push('/login');
         }}
       >
-        <Text style={styles.loginText}>Login</Text>
+        <Text style={styles.loginText}>{t('initial.login')}</Text>
       </TouchableOpacity>
     </View>
   );

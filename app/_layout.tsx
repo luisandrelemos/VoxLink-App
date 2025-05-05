@@ -1,3 +1,6 @@
+import '../utils/i18n';
+import i18n from '../utils/i18n';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 import { useEffect, useCallback } from 'react';
@@ -10,6 +13,7 @@ import { Audio } from 'expo-av';
 import { enableScreens } from 'react-native-screens';
 import { TTSVoiceProvider } from '../context/TTSVoiceContext';
 
+
 enableScreens(); // Ativa transições nativas otimizadas
 
 export default function Layout() {
@@ -20,13 +24,30 @@ export default function Layout() {
   });
 
   useEffect(() => {
+    // Mantém a splash aberta até o recurso estar pronto
     SplashScreen.preventAutoHideAsync();
+    // Configuração de áudio
     Audio.setAudioModeAsync({
       playsInSilentModeIOS: true,
       staysActiveInBackground: false,
       allowsRecordingIOS: false,
       shouldDuckAndroid: true,
     });
+
+    // Carregar idioma preferido e aplicar
+    (async () => {
+      try {
+        const stored = await AsyncStorage.getItem('selectedLang');
+        if (stored) {
+          const { code } = JSON.parse(stored);
+          if (code) {
+            await i18n.changeLanguage(code);
+          }
+        }
+      } catch (e) {
+        console.warn('Falha ao carregar idioma:', e);
+      }
+    })();
   }, []);
 
   const onLayoutRootView = useCallback(async () => {

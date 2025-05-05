@@ -1,0 +1,225 @@
+{
+  "initial": {
+    "title": "VoxLink",
+    "createAccount": "Crear Cuenta",
+    "googleLogin": "Entrar con Google",
+    "facebookLogin": "Entrar con Facebook",
+    "login": "Iniciar Sesión",
+    "alertGoogle": "Inicio de sesión con Google aún no implementado",
+    "alertFacebook": "Inicio de sesión con Facebook aún no implementado"
+  },
+
+  "login": {
+    "title": "¡Hola de Nuevo!",
+    "emailPlaceholder": "Email",
+    "passwordPlaceholder": "Password",
+    "stayConnected": "Mantener sesión iniciada",
+    "loginButton": "Entrar",
+    "forgotPassword": "¿Olvidaste tu contraseña?",
+    "or": "o",
+    "google": "Google",
+    "facebook": "Facebook",
+    "successTitle": "¡Éxito!",
+    "successMessage": "¡Inicio de sesión exitoso!",
+    "errorTitle": "Error al iniciar sesión",
+    "notImplementedTitle": "No implementado",
+    "notImplemented": "{{provider}} aún no implementado",
+    "footer": "VoxLink"
+  },
+
+  "register": {
+    "title": "¿Nuevo? ¡Crea una cuenta!",
+    "namePlaceholder": "Nombre",
+    "emailPlaceholder": "Email",
+    "passwordPlaceholder": "Password",
+    "confirmPasswordPlaceholder": "Confirmar Password",
+    "acceptTermsPrefix": "Acepto los",
+    "termsLink": "Términos y Condiciones",
+    "registerButton": "Registrarse",
+    "footer": "VoxLink",
+    "termsTitle": "Términos",
+    "termsMessage": "Debes aceptar los Términos y Condiciones para continuar.",
+    "errorTitle": "Error",
+    "passwordMismatch": "¡Las contraseñas no coinciden!",
+    "successTitle": "Éxito",
+    "successMessage": "¡Cuenta creada con éxito!",
+    "termsAndConditions": "Términos y Condiciones",
+    "modalText": "1. Aceptación de Términos\nAl usar VoxLink, aceptas estos Términos y Condiciones.\n\n2. Objetivo\nVoxLink ofrece una experiencia accesible e inclusiva.\n\n3. Uso Responsable\nLos usuarios deben actuar ética y responsablemente.\n\n4. Privacidad\nTus datos se manejarán con confidencialidad.\n\n5. Actualizaciones\nPodemos actualizar estos Términos en cualquier momento.\n\n6. Contacto\nsoporte@voxlink.app\n\nÚltima actualización: Abril de 2025.",
+    "modalBack": "←",
+    "modalClose": "Cerrar"
+  },
+
+  "home": {
+    "voiceToText": "Voz a Texto",
+    "textToVoice": "Texto a Voz",
+    "quickComms": "Frases Rápidas",
+    "accessibility": "Accesibilidad"
+  },
+  
+  "profile": {
+    "back": "Mi Cuenta",
+    "defaultName": "Usuario",
+    "edit": "Editar Perfil",
+    "userType": "Tipo de Usuario",
+    "logout": "Cerrar Sesión",
+    "changePhoto": "Cambiar Foto",
+    "newName": "Nuevo nombre",
+    "currentPassword": "Contraseña actual",
+    "newPassword": "Nueva contraseña",
+    "save": "Guardar",
+    "cancel": "Cancelar",
+    "success": "Éxito",
+    "updated": "¡Datos actualizados con éxito!",
+    "error": "Error",
+    "needCurrentPassword": "Introduce tu contraseña actual para confirmar."
+  },
+
+  "userType": {
+    "heading": "Elige tu\nperfil de usuario",
+    "sub":     "Personaliza tu experiencia. Puedes cambiarlo luego en Ajustes.",
+    "continue":"Continuar",
+    "profiles": {
+      "Surdo":  {
+        "title":"Sordo",
+        "desc": "Activa subtítulos, retroalimentación visual\ny funciones de texto en tiempo real (STT)."
+      },
+      "Cego":   {
+        "title":"Ciego",
+        "desc": "Activa lector de pantalla, retroalimentación por voz (TTS), tamaños de texto ampliados y alto contraste."
+      },
+      "Mudo":   {
+        "title":"Mudo",
+        "desc": "Activa comunicación rápida con frases predefinidas,\ntexto a voz y atajos."
+      },
+      "Outros": {
+        "title":"Otros",
+        "desc": "Accede a todas las funcionalidades de forma estándar."
+      }
+    }
+  },
+
+  "settings": {
+      "back": "← Ajustes",
+      "language": "Idioma",
+      "chooseLanguage": "Elige idioma",
+      "textSize": "Tamaño del texto",
+      "ttsVoice": "Voz del TTS",
+      "chooseVoice": "Elige voz",
+      "userType": "Tipo de usuario",
+      "chooseUserType": "Elige tipo de usuario",
+      "soundFeedback": "Feedback sonoro",
+      "soundDesc": "Sonidos en interacciones",
+      "hapticFeedback": "Feedback háptico",
+      "hapticDesc": "Vibración en interacciones",
+      "voiceCommands": "Comandos de voz",
+      "voiceDesc": "Activa asistente al pulsar logo",
+      "footer": "VoxLink\nVersión 1.0"
+    },
+    "voices": {
+      "Feminina": "Femenina",
+      "Masculina": "Masculina"
+    },
+    "users": {
+      "Cego": "Ciego",
+      "Surdo": "Sordo",
+      "Mudo": "Mudo",
+      "Outros": "Otros"
+    },
+
+    "info": {
+    "back": "Información",
+
+    "about": {
+      "title": "Sobre VoxLink",
+      "desc":  "VoxLink es una plataforma inclusiva que conecta a usuarios con diferentes necesidades con interfaces accesibles."
+    },
+
+    "accessibility": {
+      "title": "Accesibilidad",
+      "desc":  "Ajustes de tema, texto, respuesta háptica y más para mejorar la usabilidad para todos.",
+      "btn":   "Ir a Ajustes"
+    },
+
+    "faqTitle": "Preguntas Frecuentes",
+    "faq1": { "q": "¿Cómo cambio el tamaño del texto?",    "a": "Ve a Ajustes > Tamaño de Texto y selecciona tu preferencia." },
+    "faq2": { "q": "¿La app admite comandos de voz?",       "a": "Sí, puedes activarlos en Ajustes > Comandos de Voz." },
+    "faq3": { "q": "¿Cómo cambio el idioma de la app?",     "a": "En Ajustes, toca Idioma y elige tu idioma preferido." },
+
+    "contacts": {
+      "title":   "Contactos",
+      "email":   "Correo: suporte@voxlink.app",
+      "site":    "Sitio: www.voxlink.app",
+      "termsBtn":"Ver Términos y Condiciones"
+    },
+
+    "terms": {
+      "title":   "Términos y Condiciones",
+      "p1":      "1. Aceptación de los Términos",
+      "p1_1":    "Al usar la aplicación VoxLink, aceptas estos Términos y Condiciones.",
+      "p2":      "2. Propósito de la App",
+      "p2_1":    "VoxLink busca ofrecer una experiencia inclusiva y accesible para todos los usuarios, con funciones adaptadas a necesidades específicas.",
+      "p3":      "3. Uso Responsable",
+      "p3_1":    "Los usuarios acuerdan usar la app de forma ética, respetando a otros usuarios y los recursos proporcionados.",
+      "p4":      "4. Privacidad",
+      "p4_1":    "Los datos proporcionados se mantendrán confidenciales. Recogemos solo la información necesaria para mejorar la experiencia.",
+      "p5":      "5. Actualizaciones",
+      "p5_1":    "Nos reservamos el derecho de modificar estos Términos en cualquier momento. Revisa esta sección periódicamente.",
+      "p6":      "6. Contactos",
+      "p6_1":    "Para preguntas, contáctanos en suporte@voxlink.app.",
+      "updated": "Última actualización: Abril de 2025.",
+      "close":   "Cerrar"
+    }
+  },
+
+  "stt": {
+    "back": "← Voz a Texto",
+    "placeholder": "¡Bienvenido a Speech-to-Text! Empieza a grabar...",
+    "permissionDeniedTitle": "Permiso denegado",
+    "permissionDeniedMessage": "Debes permitir el acceso al micrófono.",
+    "listening": "👂 Escuchando...",
+    "transcribing": "✍🏽 Transcribiendo...",
+    "invalidAudio": "⚠️ Audio inválido.",
+    "noSpeechDetected": "⚠️ No se detectó voz.",
+    "translationError": "⚠️ Error en la traducción.",
+    "processingError": "⚠️ Error al procesar el audio.",
+    "chooseLanguage": "Elige el idioma"
+  },
+
+  "tts": {
+    "back": "← Texto a Voz",
+    "placeholder": "Escribe aquí…",
+    "voice": "Voz",
+    "chooseVoice": "Elige voz",
+    "language": "Idioma",
+    "chooseLanguage": "Elige idioma",
+    "speed": "Velocidad",
+    "convert": "Convertir"
+  },
+  "languages": {
+    "pt": "Português (Portugal)",
+    "en": "English (US)",
+    "es": "Español (España)",
+    "fr": "Français (France)"
+  },
+
+  "fast": {
+    "back": "← Comunicación Rápida",
+    "quickMessages": [
+      "¡Hola,\n¿qué tal?",
+      "Necesito\nayuda",
+      "¡Buenas\ntardes!",
+      "¿Vamos\nfuera?",
+      "Necesito\nuna aventón",
+      "Perdón",
+      "Muchas\ngracias",
+      "Tengo\nhambre",
+      "¿Dónde\nestá el baño?"
+    ],
+    "freeWrite": "Escritura Libre",
+    "placeholder": "Escribir Aquí",
+    "listen": "Escuchar",
+    "language": "Idioma",
+    "chooseLanguage": "Elige el idioma",
+    "speed": "Velocidad"
+  }
+}  

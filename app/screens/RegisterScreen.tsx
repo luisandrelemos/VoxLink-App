@@ -1,15 +1,31 @@
 import React, { useState } from 'react';
 import {
-  View, Text, TextInput, TouchableOpacity, StyleSheet, Image,
-  SafeAreaView, KeyboardAvoidingView, Platform, ScrollView, Alert, Switch, Modal
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+  Image,
+  SafeAreaView,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  Alert,
+  Switch,
+  Modal,
 } from 'react-native';
 import { Entypo } from '@expo/vector-icons';
-import { createUserWithEmailAndPassword, updateProfile } from 'firebase/auth';
+import {
+  createUserWithEmailAndPassword,
+  updateProfile,
+} from 'firebase/auth';
 import { auth } from '../../utils/firebaseConfig';
 import { useRouter } from 'expo-router';
 import useHaptics from '../../utils/useHaptics';
+import { useTranslation } from 'react-i18next';
 
 export default function RegisterScreen() {
+  const { t } = useTranslation();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -24,22 +40,24 @@ export default function RegisterScreen() {
 
   async function handleRegister() {
     if (!acceptedTerms) {
-      Alert.alert('Termos', 'Deves aceitar os Termos e Condições antes de prosseguir.');
+      Alert.alert(t('register.termsTitle'), t('register.termsMessage'));
       return;
     }
-
     if (password !== confirmPassword) {
-      Alert.alert('Erro', 'As passwords não coincidem!');
+      Alert.alert(t('register.errorTitle'), t('register.passwordMismatch'));
       return;
     }
-
     try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      await updateProfile(userCredential.user, { displayName: name });
-      Alert.alert('Sucesso', 'Conta criada com sucesso!');
+      const userCred = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      await updateProfile(userCred.user, { displayName: name });
+      Alert.alert(t('register.successTitle'), t('register.successMessage'));
       router.replace('/usertypescreen');
-    } catch (error: any) {
-      Alert.alert('Erro no registo', error.message);
+    } catch (err: any) {
+      Alert.alert(t('register.errorTitle'), err.message);
     }
   }
 
@@ -49,14 +67,20 @@ export default function RegisterScreen() {
         style={styles.container}
         behavior={Platform.OS === 'ios' ? 'padding' : undefined}
       >
-        <ScrollView contentContainerStyle={styles.scrollContainer} keyboardShouldPersistTaps="handled">
-          <Image source={require('../../assets/images/logo.png')} style={styles.logo} />
-          <Text style={styles.title}>És Novo? Cria uma Conta!</Text>
+        <ScrollView
+          contentContainerStyle={styles.scrollContainer}
+          keyboardShouldPersistTaps="handled"
+        >
+          <Image
+            source={require('../../assets/images/logo.png')}
+            style={styles.logo}
+          />
+          <Text style={styles.title}>{t('register.title')}</Text>
 
           <TextInput
             onFocus={triggerHaptic}
             style={styles.input}
-            placeholder="Nome"
+            placeholder={t('register.namePlaceholder')}
             placeholderTextColor="#000"
             value={name}
             onChangeText={setName}
@@ -64,7 +88,7 @@ export default function RegisterScreen() {
           <TextInput
             onFocus={triggerHaptic}
             style={styles.input}
-            placeholder="Email"
+            placeholder={t('register.emailPlaceholder')}
             placeholderTextColor="#000"
             value={email}
             onChangeText={setEmail}
@@ -75,7 +99,7 @@ export default function RegisterScreen() {
             <TextInput
               onFocus={triggerHaptic}
               style={styles.inputPassword}
-              placeholder="Password"
+              placeholder={t('register.passwordPlaceholder')}
               placeholderTextColor="#000"
               secureTextEntry={!showPassword}
               value={password}
@@ -87,7 +111,11 @@ export default function RegisterScreen() {
                 triggerHaptic();
               }}
             >
-              <Entypo name={showPassword ? 'eye-with-line' : 'eye'} size={22} color="#888" />
+              <Entypo
+                name={showPassword ? 'eye-with-line' : 'eye'}
+                size={22}
+                color="#888"
+              />
             </TouchableOpacity>
           </View>
 
@@ -95,7 +123,7 @@ export default function RegisterScreen() {
             <TextInput
               onFocus={triggerHaptic}
               style={styles.inputPassword}
-              placeholder="Confirmação Password"
+              placeholder={t('register.confirmPasswordPlaceholder')}
               placeholderTextColor="#000"
               secureTextEntry={!showConfirmPassword}
               value={confirmPassword}
@@ -103,15 +131,18 @@ export default function RegisterScreen() {
             />
             <TouchableOpacity
               onPress={() => {
-                setShowConfirmPassword(!showConfirmPassword );
+                setShowConfirmPassword(!showConfirmPassword);
                 triggerHaptic();
               }}
             >
-              <Entypo name={showConfirmPassword  ? 'eye-with-line' : 'eye'} size={22} color="#888" />
+              <Entypo
+                name={showConfirmPassword ? 'eye-with-line' : 'eye'}
+                size={22}
+                color="#888"
+              />
             </TouchableOpacity>
           </View>
 
-          {/* Switch + Link para Termos */}
           <View style={styles.termsRow}>
             <Switch
               value={acceptedTerms}
@@ -129,7 +160,10 @@ export default function RegisterScreen() {
               }}
             >
               <Text style={styles.termsText}>
-                Aceito os <Text style={styles.termsLink}>Termos e Condições</Text>
+                {t('register.acceptTermsPrefix')}{' '}
+                <Text style={styles.termsLink}>
+                  {t('register.termsLink')}
+                </Text>
               </Text>
             </TouchableOpacity>
           </View>
@@ -141,14 +175,19 @@ export default function RegisterScreen() {
               handleRegister();
             }}
           >
-            <Text style={styles.registerButtonText}>Criar Conta</Text>
+            <Text style={styles.registerButtonText}>
+              {t('register.registerButton')}
+            </Text>
           </TouchableOpacity>
 
-          <Text style={styles.footerText}>VoxLink</Text>
+          <Text style={styles.footerText}>{t('register.footer')}</Text>
         </ScrollView>
 
-        {/* Modal com os Termos */}
-        <Modal visible={termsVisible} animationType="slide" onRequestClose={() => setTermsVisible(false)}>
+        <Modal
+          visible={termsVisible}
+          animationType="slide"
+          onRequestClose={() => setTermsVisible(false)}
+        >
           <View style={styles.modalContainer}>
             <View style={styles.modalHeader}>
               <TouchableOpacity
@@ -157,46 +196,22 @@ export default function RegisterScreen() {
                   setTermsVisible(false);
                 }}
               >
-                <Text style={styles.modalBack}>←</Text>
+                <Text style={styles.modalBack}>
+                  {t('register.modalBack')}
+                </Text>
               </TouchableOpacity>
-              <Image source={require('../../assets/images/logo-header.png')} style={styles.modalLogo} />
+              <Image
+                source={require('../../assets/images/logo-header.png')}
+                style={styles.modalLogo}
+              />
             </View>
             <ScrollView contentContainerStyle={styles.modalContent}>
-              <Text style={styles.modalTitle}>Termos e Condições</Text>
-              <Text style={styles.modalText}>
-                {`1. Aceitação dos Termos\n`}
-                <Text style={styles.modalSubTitle}>
-                  Ao utilizar a aplicação VoxLink, concorda com os presentes Termos e Condições.
-                </Text>
-
-                {`\n\n2. Objetivo da Aplicação\n`}
-                <Text style={styles.modalSubTitle}>
-                  A VoxLink visa fornecer uma experiência acessível e inclusiva a todos os utilizadores.
-                </Text>
-
-                {`\n\n3. Utilização Responsável\n`}
-                <Text style={styles.modalSubTitle}>
-                  O utilizador compromete-se a usar a aplicação de forma ética e responsável.
-                </Text>
-
-                {`\n\n4. Privacidade\n`}
-                <Text style={styles.modalSubTitle}>
-                  Os dados fornecidos serão tratados com confidencialidade.
-                </Text>
-
-                {`\n\n5. Atualizações\n`}
-                <Text style={styles.modalSubTitle}>
-                  Reservamo-nos o direito de alterar estes Termos a qualquer momento.
-                </Text>
-
-                {`\n\n6. Contactos\n`}
-                <Text style={styles.modalSubTitle}>
-                  suporte@voxlink.app
-                </Text>
-
-                {`\n\nÚltima atualização: Abril de 2025.`}
+              <Text style={styles.modalTitle}>
+                {t('register.termsAndConditions')}
               </Text>
-
+              <Text style={styles.modalText}>
+                {t('register.modalText')}
+              </Text>
               <TouchableOpacity
                 style={[styles.registerButton, { marginTop: 30 }]}
                 onPress={() => {
@@ -204,7 +219,9 @@ export default function RegisterScreen() {
                   setTermsVisible(false);
                 }}
               >
-                <Text style={styles.registerButtonText}>Fechar</Text>
+                <Text style={styles.registerButtonText}>
+                  {t('register.modalClose')}
+                </Text>
               </TouchableOpacity>
             </ScrollView>
           </View>
@@ -257,6 +274,22 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     fontFamily: 'Montserrat-Regular',
   },
+  termsRow: {
+    width: '100%',
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    marginVertical: 10,
+  },
+  termsText: {
+    color: '#fff',
+    fontFamily: 'Montserrat-Regular',
+  },
+  termsLink: {
+    color: '#fff',
+    fontFamily: 'Montserrat-Bold',
+    textDecorationLine: 'underline',
+  },
   registerButton: {
     width: '100%',
     backgroundColor: 'transparent',
@@ -278,27 +311,7 @@ const styles = StyleSheet.create({
     fontSize: 24,
     fontFamily: 'Montserrat-SemiBold',
   },
-  termsRow: {
-    width: '100%',
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: 10,
-    marginVertical: 10,
-  },
-  termsText: {
-    color: '#fff',
-    fontFamily: 'Montserrat-Regular',
-  },
-  termsLink: {
-    color: '#fff',
-    fontFamily: 'Montserrat-Bold',
-    textDecorationLine: 'underline',
-  },
-  modalContainer: {
-    flex: 1,
-    backgroundColor: '#191919',
-  },
-  
+  modalContainer: { flex: 1, backgroundColor: '#191919' },
   modalHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -309,24 +322,20 @@ const styles = StyleSheet.create({
     paddingBottom: 10,
     zIndex: 1,
   },
-  
   modalBack: {
     color: '#fff',
     fontSize: 28,
     fontFamily: 'Montserrat-Bold',
   },
-  
   modalLogo: {
     width: 110,
     height: 40,
     resizeMode: 'contain',
   },
-  
   modalContent: {
     paddingHorizontal: 20,
     paddingBottom: 40,
   },
-  
   modalTitle: {
     color: '#fff',
     fontSize: 24,
@@ -335,7 +344,6 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     marginTop: 10,
   },
-  
   modalText: {
     color: '#aaa',
     fontSize: 15,
@@ -343,9 +351,8 @@ const styles = StyleSheet.create({
     lineHeight: 26,
     textAlign: 'justify',
   },
-  
   modalSubTitle: {
     color: '#fff',
     fontFamily: 'Montserrat-SemiBold',
-  },  
+  },
 });
