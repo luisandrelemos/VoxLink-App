@@ -1,16 +1,27 @@
-import { View, Text, Image, TouchableOpacity, StyleSheet, Dimensions, StatusBar } from 'react-native';
-import { useRouter } from 'expo-router';
+import React from 'react';
+import {
+  View,
+  Image,
+  TouchableOpacity,
+  StyleSheet,
+  Dimensions,
+  StatusBar
+} from 'react-native';
+import { useRouter }    from 'expo-router';
+import { useTranslation } from 'react-i18next';
+
 import BottomNavBar from '../components/BottomNavBar';
-import useHaptics from '../../utils/useHaptics';
-import { useSound } from '../../context/SoundContext';
-import ScaledText from '../components/ScaledText'; 
+import useHaptics    from '../../utils/useHaptics';
+import { useSound }  from '../../context/SoundContext';
+import ScaledText    from '../components/ScaledText';
 
 const { width } = Dimensions.get('window');
 
 export default function HomeScreen() {
-  const router = useRouter();
+  const router        = useRouter();
   const triggerHaptic = useHaptics();
   const { playClick } = useSound();
+  const { t }         = useTranslation();
 
   const handlePress = (callback: () => void) => {
     triggerHaptic();
@@ -24,30 +35,65 @@ export default function HomeScreen() {
 
       <View style={styles.scrollContainer}>
         {/* Logo no topo */}
-        <Image source={require('../../assets/images/logo-header.png')} style={styles.logo} />
+        <Image
+          source={require('../../assets/images/logo-header.png')}
+          style={styles.logo}
+        />
 
         {/* Bloco: Voz-para-Texto */}
-        <TouchableOpacity style={styles.block} onPress={() => handlePress(() => router.push('/stt'))}>
-          <Image source={require('../../assets/images/stt-icon.png')} style={styles.blockImage} />
-          <ScaledText base={15} style={styles.blockLabel}>Voz-para-Texto</ScaledText>
+        <TouchableOpacity
+          style={styles.block}
+          onPress={() => handlePress(() => router.push('/stt'))}
+        >
+          <Image
+            source={require('../../assets/images/stt-icon.png')}
+            style={styles.blockImage}
+          />
+          <ScaledText base={15} style={styles.blockLabel}>
+            {t('home.voiceToText')}
+          </ScaledText>
         </TouchableOpacity>
 
         {/* Bloco: Texto-para-Voz */}
-        <TouchableOpacity style={styles.block} onPress={() => handlePress(() => router.push('/tts'))}>
-          <Image source={require('../../assets/images/tts-icon.png')} style={styles.blockImage} />
-          <ScaledText base={15} style={styles.blockLabel}>Texto-para-Voz</ScaledText>
+        <TouchableOpacity
+          style={styles.block}
+          onPress={() => handlePress(() => router.push('/tts'))}
+        >
+          <Image
+            source={require('../../assets/images/tts-icon.png')}
+            style={styles.blockImage}
+          />
+          <ScaledText base={15} style={styles.blockLabel}>
+            {t('home.textToVoice')}
+          </ScaledText>
         </TouchableOpacity>
 
         {/* Bloco: Comunicação Rápida */}
-        <TouchableOpacity style={styles.block} onPress={() => handlePress(() => router.push('/fasttext'))}>
-          <Image source={require('../../assets/images/list-icon.png')} style={styles.blockImage} />
-          <ScaledText base={15} style={styles.blockLabel}>Comunicação Rápida</ScaledText>
+        <TouchableOpacity
+          style={styles.block}
+          onPress={() => handlePress(() => router.push('/fasttext'))}
+        >
+          <Image
+            source={require('../../assets/images/list-icon.png')}
+            style={styles.blockImage}
+          />
+          <ScaledText base={15} style={styles.blockLabel}>
+            {t('home.quickComms')}
+          </ScaledText>
         </TouchableOpacity>
 
         {/* Bloco: Acessibilidade */}
-        <TouchableOpacity style={styles.block} onPress={() => handlePress(() => router.push('/settings'))}>
-          <Image source={require('../../assets/images/accessibility-icon.png')} style={styles.blockImage} />
-          <ScaledText base={15} style={styles.blockLabel}>Acessibilidade</ScaledText>
+        <TouchableOpacity
+          style={styles.block}
+          onPress={() => handlePress(() => router.push('/settings'))}
+        >
+          <Image
+            source={require('../../assets/images/accessibility-icon.png')}
+            style={styles.blockImage}
+          />
+          <ScaledText base={15} style={styles.blockLabel}>
+            {t('home.accessibility')}
+          </ScaledText>
         </TouchableOpacity>
       </View>
 

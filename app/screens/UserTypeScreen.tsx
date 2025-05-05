@@ -1,106 +1,92 @@
-/* app/screens/UserTypeScreen.tsx */
 import React, { useEffect, useState } from 'react';
 import {
   View, TouchableOpacity, Image, StyleSheet, StatusBar,
-  DeviceEventEmitter,                     
+  DeviceEventEmitter,
 } from 'react-native';
-import AsyncStorage    from '@react-native-async-storage/async-storage';
-import { useRouter }   from 'expo-router';
-import useHaptics      from '../../utils/useHaptics';
-import { useSound }    from '../../context/SoundContext';
-import ScaledText      from '../components/ScaledText';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
+import useHaptics from '../../utils/useHaptics';
+import { useSound } from '../../context/SoundContext';
+import ScaledText from '../components/ScaledText';
 
-/* ---------- perfis disponíveis ---------- */
+/* ─────────── perfis disponíveis ─────────── */
 const userTypes = [
   {
     key: 'Surdo',
-    title: 'Surdo',
-    desc: 'Ativa legendas, feedback visual\n e funcionalidades de texto em tempo real (STT).',
     icon: require('../../assets/images/icon-deaf.png'),
   },
   {
     key: 'Cego',
-    title: 'Cego',
-    desc: 'Ativa leitor de ecrã, feedback por voz (TTS), tamanhos de texto ampliados e contraste elevado.',
     icon: require('../../assets/images/icon-blind.png'),
   },
   {
     key: 'Mudo',
-    title: 'Mudo',
-    desc: 'Ativa comunicação rápida com frases pré-definidas,\n escrita convertida em voz e atalhos.',
     icon: require('../../assets/images/icon-mute.png'),
   },
   {
     key: 'Outros',
-    title: 'Outros',
-    desc: 'Acede a todas as funcionalidades de forma padrão.',
     icon: require('../../assets/images/icon-others.png'),
   },
 ];
 
-/* ---------- defaults de switches ---------- */
-const defaults: Record<string, { sound:boolean; haptic:boolean; voiceCmd:boolean }> = {
-  Cego:   { sound:true,  haptic:true,  voiceCmd:true  },
-  Surdo:  { sound:false, haptic:true,  voiceCmd:true  },
-  Mudo:   { sound:true,  haptic:true,  voiceCmd:false },
-  Outros: { sound:true,  haptic:true,  voiceCmd:true  },
+/* ─────────── defaults ─────────── */
+const defaults: Record<string, { sound: boolean; haptic: boolean; voiceCmd: boolean }> = {
+  Cego:   { sound: true,  haptic: true,  voiceCmd: true  },
+  Surdo:  { sound: false, haptic: true,  voiceCmd: true  },
+  Mudo:   { sound: true,  haptic: true,  voiceCmd: false },
+  Outros: { sound: true,  haptic: true,  voiceCmd: true  },
 };
 
 export default function UserTypeScreen() {
-  const router         = useRouter();
-  const triggerHaptic  = useHaptics();
-  const { playClick }  = useSound();
+  const { t }         = useTranslation();
+  const router        = useRouter();
+  const triggerHaptic = useHaptics();
+  const { playClick } = useSound();
 
-  const [soundOn,  setSoundOn] = useState(true);
-  const [selected, setSelected] = useState<string | null>(null);
+  const [soundOn, setSoundOn]     = useState(true);
+  const [selected, setSelected]   = useState<string | null>(null);
 
-  /* ---------- carregar prefs existentes ---------- */
+  // Carregar prefs
   useEffect(() => {
     (async () => {
-      const [ storedType , storedSound ] = await AsyncStorage.multiGet([
+      const [[, storedType], [, storedSound]] = await AsyncStorage.multiGet([
         'selectedUserType', 'feedbackSound',
       ]);
 
-      if (storedType[1]) {
-        const { label } = JSON.parse(storedType[1]);
-        const found     = userTypes.find(u => u.title === label);
-        if (found) setSelected(found.key);
+      if (storedType) {
+        const obj = JSON.parse(storedType);
+        setSelected(obj.key);
       }
-      if (storedSound[1] !== null) setSoundOn(JSON.parse(storedSound[1]));
+      if (storedSound !== null) {
+        setSoundOn(JSON.parse(storedSound));
+      }
     })();
   }, []);
 
-  const click = () => { if (soundOn) playClick(); };
+  const click = () => {
+    if (soundOn) playClick();
+  };
 
-  /* ---------- aplicar defaults & navegar ---------- */
+  // Guardar e aplicar defaults
   async function handleContinue() {
     if (!selected) return;
+    const profile = { key: selected, icon: userTypes.find(u=>u.key===selected)!.icon };
 
-    const profile = userTypes.find(u => u.key === selected)!;
-
-    /* guardar tipo de utilizador */
-    await AsyncStorage.setItem(
-      'selectedUserType',
-      JSON.stringify({ label: profile.title, icon: profile.icon })
-    );
-
-    /* aplicar defaults associados */
-    const { sound, haptic, voiceCmd } = defaults[profile.title] ?? defaults.Outros;
+    await AsyncStorage.setItem('selectedUserType', JSON.stringify(profile));
+    const defs = defaults[selected] ?? defaults.Outros;
     await AsyncStorage.multiSet([
-      ['feedbackSound',  JSON.stringify(sound)],
-      ['hapticFeedback', JSON.stringify(haptic)],
-      ['voiceCommands',  JSON.stringify(voiceCmd)],
+      ['feedbackSound',  JSON.stringify(defs.sound)],
+      ['hapticFeedback', JSON.stringify(defs.haptic)],
+      ['voiceCommands',  JSON.stringify(defs.voiceCmd)],
     ]);
-
-    /* notificar BottomNavBar se “Comandos por Voz” mudou */
-    DeviceEventEmitter.emit('voiceCommandsToggle', voiceCmd);
+    DeviceEventEmitter.emit('voiceCommandsToggle', defs.voiceCmd);
 
     triggerHaptic();
     click();
     router.replace('/home');
   }
 
-  /* ---------- UI ---------- */
   return (
     <View style={styles.container}>
       <StatusBar barStyle="light-content" backgroundColor="#191919" />
@@ -108,11 +94,10 @@ export default function UserTypeScreen() {
       <Image source={require('../../assets/images/logo-header.png')} style={styles.logo} />
 
       <ScaledText base={24} style={styles.heading}>
-        Escolhe o Teu Perfil{'\n'}De Utilizador
+        {t('userType.heading')}
       </ScaledText>
-
       <ScaledText base={14} style={styles.sub}>
-        Personaliza a tua experiência. Podes mudar depois em Definições.
+        {t('userType.sub')}
       </ScaledText>
 
       <View style={styles.grid}>
@@ -126,8 +111,12 @@ export default function UserTypeScreen() {
               onPress={() => { triggerHaptic(); click(); setSelected(u.key); }}
             >
               <Image source={u.icon} style={styles.cardIcon} />
-              <ScaledText base={16} style={styles.cardTitle}>{u.title}</ScaledText>
-              <ScaledText base={12} style={styles.cardDesc}>{u.desc}</ScaledText>
+              <ScaledText base={16} style={styles.cardTitle}>
+                {t(`userType.profiles.${u.key}.title`)}
+              </ScaledText>
+              <ScaledText base={12} style={styles.cardDesc}>
+                {t(`userType.profiles.${u.key}.desc`)}
+              </ScaledText>
             </TouchableOpacity>
           );
         })}
@@ -138,13 +127,14 @@ export default function UserTypeScreen() {
         disabled={!selected}
         onPress={handleContinue}
       >
-        <ScaledText base={18} style={styles.continueTxt}>Continuar</ScaledText>
+        <ScaledText base={18} style={styles.continueTxt}>
+          {t('userType.continue')}
+        </ScaledText>
       </TouchableOpacity>
     </View>
   );
 }
 
-/* ---------- estilos ---------- */
 const styles = StyleSheet.create({
   container:{ flex:1, backgroundColor:'#191919', alignItems:'center', paddingTop:10 },
   logo:{ width:110, height:40, resizeMode:'contain', marginBottom:25 },

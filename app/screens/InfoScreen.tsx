@@ -7,6 +7,7 @@ import {
 import Swiper from 'react-native-swiper';
 import BottomNavBar from '../components/BottomNavBar';
 import { useRouter } from 'expo-router';
+import { useTranslation } from 'react-i18next';
 import useHaptics from '../../utils/useHaptics';
 import { MaterialIcons } from '@expo/vector-icons';
 import { useSound } from '../../context/SoundContext';
@@ -14,41 +15,55 @@ import ScaledText from '../components/ScaledText';
 
 const { width, height } = Dimensions.get('window');
 
-/* Ativa animações no Android */
+// Ativa animações no Android
 if (Platform.OS === 'android' && UIManager.setLayoutAnimationEnabledExperimental) {
   UIManager.setLayoutAnimationEnabledExperimental(true);
 }
 
 export default function InfoScreen() {
-  const router        = useRouter();
-  const triggerHaptic = useHaptics();
-  const { playClick } = useSound();
+  const { t }          = useTranslation();
+  const router         = useRouter();
+  const triggerHaptic  = useHaptics();
+  const { playClick }  = useSound();
 
-  const [faqOpen, setFaqOpen]     = useState<number | null>(null);
+  const [faqOpen, setFaqOpen]         = useState<number | null>(null);
   const [termsVisible, setTermsVisible] = useState(false);
 
-  const toggleFaq = (index: number) => {
+  const toggleFaq = (i: number) => {
     LayoutAnimation.configureNext(LayoutAnimation.Presets.easeInEaseOut);
-    setFaqOpen(faqOpen === index ? null : index);
-    triggerHaptic();
-    playClick();
+    setFaqOpen(faqOpen === i ? null : i);
+    triggerHaptic(); playClick();
   };
 
   const faqs = [
-    { question: 'Como posso alterar o tamanho do texto?', answer: 'Vai até às Definições > Tamanho Do Texto e altere para a opção desejada.' },
-    { question: 'A app suporta comandos por voz?',             answer: 'Sim, podes ativar nas Definições > Comandos por Voz.' },
-    { question: 'Como altero o idioma da app?',                answer: 'Nas Definições, toca em Idioma e escolhe o teu idioma preferido.' },
+    {
+      q: t('info.faq1.q'),
+      a: t('info.faq1.a'),
+    },
+    {
+      q: t('info.faq2.q'),
+      a: t('info.faq2.a'),
+    },
+    {
+      q: t('info.faq3.q'),
+      a: t('info.faq3.a'),
+    },
   ];
 
-  /* ─────────── UI ─────────── */
+  const onPress = (cb: ()=>void) => {
+    triggerHaptic(); playClick(); cb();
+  };
+
   return (
     <View style={styles.container}>
       <StatusBar backgroundColor="#191919" barStyle="light-content" />
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => { router.push('/home'); triggerHaptic(); playClick(); }}>
-          <ScaledText base={16} style={styles.backText}>← Informações</ScaledText>
+        <TouchableOpacity onPress={()=>onPress(()=>router.push('/home'))}>
+          <ScaledText base={16} style={styles.backText}>
+            ← {t('info.back')}
+          </ScaledText>
         </TouchableOpacity>
         <Image source={require('../../assets/images/logo-header.png')} style={styles.logo} />
       </View>
@@ -62,133 +77,112 @@ export default function InfoScreen() {
         paginationStyle={styles.pagination}
         onIndexChanged={triggerHaptic}
       >
-
-        {/* Slide 1 - Sobre */}
+        {/* Slide 1: Sobre */}
         <View style={styles.slide}>
           <Image source={require('../../assets/images/slide-about.png')} style={styles.slideImage} />
-          <ScaledText base={22} style={styles.title}>Sobre a VoxLink</ScaledText>
-          <ScaledText base={16} style={styles.description}>
-            A VoxLink é uma plataforma inclusiva que conecta utilizadores com diferentes necessidades a interfaces acessíveis.
-          </ScaledText>
+          <ScaledText base={22} style={styles.title}>{t('info.about.title')}</ScaledText>
+          <ScaledText base={16} style={styles.description}>{t('info.about.desc')}</ScaledText>
         </View>
 
-        {/* Slide 2 - Acessibilidade */}
+        {/* Slide 2: Acessibilidade */}
         <View style={styles.slide}>
           <Image source={require('../../assets/images/slide-accessibility.png')} style={styles.slideImage} />
-          <ScaledText base={22} style={styles.title}>Acessibilidade</ScaledText>
-          <ScaledText base={16} style={styles.description}>
-            Ajustes de tema, texto, feedback tátil e muito mais para melhorar a usabilidade para todos os utilizadores.
-          </ScaledText>
-
-          <TouchableOpacity style={styles.button} onPress={() => { router.push('/settings'); triggerHaptic(); playClick(); }}>
+          <ScaledText base={22} style={styles.title}>{t('info.accessibility.title')}</ScaledText>
+          <ScaledText base={16} style={styles.description}>{t('info.accessibility.desc')}</ScaledText>
+          <TouchableOpacity
+            style={styles.button}
+            onPress={()=>onPress(()=>router.push('/settings'))}
+          >
             <MaterialIcons name="settings-accessibility" size={22} color="#000" />
-            <ScaledText base={16} style={styles.buttonText}>Ir para Definições</ScaledText>
+            <ScaledText base={16} style={styles.buttonText}>
+              {t('info.accessibility.btn')}
+            </ScaledText>
           </TouchableOpacity>
         </View>
 
-        {/* Slide 3 - FAQ */}
+        {/* Slide 3: FAQ */}
         <View style={{ flex: 1 }}>
           <ScrollView contentContainerStyle={styles.faqSlideContent} showsVerticalScrollIndicator={false}>
             <Image source={require('../../assets/images/slide-faq.png')} style={styles.slideImage} />
-            <ScaledText base={22} style={styles.title}>Perguntas Frequentes</ScaledText>
+            <ScaledText base={22} style={styles.title}>{t('info.faqTitle')}</ScaledText>
 
-            {faqs.map((faq, index) => {
-              const isOpen = faqOpen === index;
-              return (
-                <TouchableOpacity
-                  key={index}
-                  activeOpacity={0.9}
-                  style={[styles.faqItem, isOpen && styles.faqItemOpen]}
-                  onPress={() => toggleFaq(index)}
-                >
-                  <View style={styles.faqHeader}>
-                    <ScaledText base={16} style={styles.faqQuestion}>{faq.question}</ScaledText>
-                    <MaterialIcons
-                      name={isOpen ? 'keyboard-arrow-up' : 'keyboard-arrow-down'}
-                      size={26}
-                      color="#fff"
-                    />
-                  </View>
-                  {isOpen && (
-                    <ScaledText base={14} style={styles.faqAnswer}>{faq.answer}</ScaledText>
-                  )}
-                </TouchableOpacity>
-              );
-            })}
+            {faqs.map((f, i) => (
+              <TouchableOpacity
+                key={i}
+                style={[styles.faqItem, faqOpen === i && styles.faqItemOpen]}
+                onPress={()=>toggleFaq(i)}
+                activeOpacity={0.9}
+              >
+                <View style={styles.faqHeader}>
+                  <ScaledText base={16} style={styles.faqQuestion}>{f.q}</ScaledText>
+                  <MaterialIcons
+                    name={faqOpen === i ? 'keyboard-arrow-up' : 'keyboard-arrow-down'}
+                    size={26}
+                    color="#fff"
+                  />
+                </View>
+                {faqOpen === i && (
+                  <ScaledText base={14} style={styles.faqAnswer}>{f.a}</ScaledText>
+                )}
+              </TouchableOpacity>
+            ))}
           </ScrollView>
         </View>
 
-        {/* Slide 4 - Contactos */}
+        {/* Slide 4: Contactos */}
         <View style={styles.slide}>
           <Image source={require('../../assets/images/slide-contact.png')} style={styles.slideImage} />
-          <ScaledText base={22} style={styles.title}>Contactos</ScaledText>
+          <ScaledText base={22} style={styles.title}>{t('info.contacts.title')}</ScaledText>
           <ScaledText base={16} style={styles.description}>
-            Email: suporte@voxlink.app{"\n"}Site: www.voxlink.app
+            {t('info.contacts.email')}{"\n"}{t('info.contacts.site')}
           </ScaledText>
-
           <TouchableOpacity
             style={styles.button}
-            onPress={() => { triggerHaptic(); playClick(); setTermsVisible(true); }}
+            onPress={()=>{ triggerHaptic(); playClick(); setTermsVisible(true); }}
           >
             <MaterialIcons name="description" size={22} color="#000" />
-            <ScaledText base={16} style={styles.buttonText}>Ver Termos e Condições</ScaledText>
+            <ScaledText base={16} style={styles.buttonText}>
+              {t('info.contacts.termsBtn')}
+            </ScaledText>
           </TouchableOpacity>
 
           {/* Modal Termos */}
-          <Modal visible={termsVisible} animationType="slide" onRequestClose={() => setTermsVisible(false)}>
+          <Modal
+            visible={termsVisible}
+            animationType="slide"
+            onRequestClose={()=>setTermsVisible(false)}
+          >
             <View style={styles.modalContainer}>
-
-              {/* Header do modal */}
               <View style={styles.modalHeader}>
-                <TouchableOpacity onPress={() => { triggerHaptic(); playClick(); setTermsVisible(false); }}>
+                <TouchableOpacity onPress={()=>{ triggerHaptic(); playClick(); setTermsVisible(false); }}>
                   <ScaledText base={28} style={styles.modalBack}>←</ScaledText>
                 </TouchableOpacity>
                 <Image source={require('../../assets/images/logo-header.png')} style={styles.modalLogo} />
               </View>
-
-              {/* Conteúdo */}
               <ScrollView contentContainerStyle={styles.modalContent}>
-                <ScaledText base={24} style={styles.modalTitle}>Termos e Condições</ScaledText>
-
+                <ScaledText base={24} style={styles.modalTitle}>{t('info.terms.title')}</ScaledText>
                 <ScaledText base={15} style={styles.modalText}>
-                  {`1. Aceitação dos Termos\n`}
-                  <ScaledText base={15} style={styles.modalSubTitle}>
-                    Ao utilizar a aplicação VoxLink, concorda com os presentes Termos e Condições.
-                  </ScaledText>
-
-                  {`\n\n2. Objetivo da Aplicação\n`}
-                  <ScaledText base={15} style={styles.modalSubTitle}>
-                    A VoxLink visa fornecer uma experiência acessível e inclusiva a todos os utilizadores, com funcionalidades ajustadas a necessidades específicas.
-                  </ScaledText>
-
-                  {`\n\n3. Utilização Responsável\n`}
-                  <ScaledText base={15} style={styles.modalSubTitle}>
-                    O utilizador compromete-se a usar a aplicação de forma ética, respeitando os outros utilizadores e os recursos disponibilizados.
-                  </ScaledText>
-
-                  {`\n\n4. Privacidade\n`}
-                  <ScaledText base={15} style={styles.modalSubTitle}>
-                    Os dados fornecidos serão tratados com confidencialidade. Recolhemos apenas a informação necessária para melhorar a experiência da aplicação.
-                  </ScaledText>
-
-                  {`\n\n5. Atualizações\n`}
-                  <ScaledText base={15} style={styles.modalSubTitle}>
-                    Reservamo-nos o direito de alterar estes Termos a qualquer momento. Recomendamos que consulte esta secção regularmente.
-                  </ScaledText>
-
-                  {`\n\n6. Contactos\n`}
-                  <ScaledText base={15} style={styles.modalSubTitle}>
-                    Em caso de dúvidas, contacte-nos através do email suporte@voxlink.app.
-                  </ScaledText>
-
-                  {`\n\nÚltima atualização: Abril de 2025.`}
+                  {t('info.terms.p1') + '\n\n'}
+                  <ScaledText base={15} style={styles.modalSubTitle}>{t('info.terms.p1_1')}</ScaledText>
+                  {'\n\n' + t('info.terms.p2') + '\n\n'}
+                  <ScaledText base={15} style={styles.modalSubTitle}>{t('info.terms.p2_1')}</ScaledText>
+                  {'\n\n' + t('info.terms.p3') + '\n\n'}
+                  <ScaledText base={15} style={styles.modalSubTitle}>{t('info.terms.p3_1')}</ScaledText>
+                  {'\n\n' + t('info.terms.p4') + '\n\n'}
+                  <ScaledText base={15} style={styles.modalSubTitle}>{t('info.terms.p4_1')}</ScaledText>
+                  {'\n\n' + t('info.terms.p5') + '\n\n'}
+                  <ScaledText base={15} style={styles.modalSubTitle}>{t('info.terms.p5_1')}</ScaledText>
+                  {'\n\n' + t('info.terms.p6') + '\n\n'}
+                  <ScaledText base={15} style={styles.modalSubTitle}>{t('info.terms.p6_1')}</ScaledText>
+                  {'\n\n' + t('info.terms.updated')}
                 </ScaledText>
-
                 <TouchableOpacity
                   style={[styles.button, { alignSelf: 'center', marginTop: 30 }]}
-                  onPress={() => { triggerHaptic(); playClick(); setTermsVisible(false); }}
+                  onPress={()=>{ triggerHaptic(); playClick(); setTermsVisible(false); }}
                 >
-                  <ScaledText base={16} style={styles.buttonText}>Fechar</ScaledText>
+                  <ScaledText base={16} style={styles.buttonText}>
+                    {t('info.terms.close')}
+                  </ScaledText>
                 </TouchableOpacity>
               </ScrollView>
             </View>
