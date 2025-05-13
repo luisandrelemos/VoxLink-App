@@ -106,6 +106,13 @@ export default function RegisterScreen() {
               onChangeText={setPassword}
             />
             <TouchableOpacity
+              accessible
+              accessibilityRole="button"
+              accessibilityLabel={ showPassword
+                ? t('register.hidePasswordLabel')
+                : t('register.showPasswordLabel')
+              }
+              style={{ width: 48, height: 48, justifyContent: 'center', alignItems: 'center' }}
               onPress={() => {
                 setShowPassword(!showPassword);
                 triggerHaptic();
@@ -130,6 +137,13 @@ export default function RegisterScreen() {
               onChangeText={setConfirmPassword}
             />
             <TouchableOpacity
+              accessible
+              accessibilityRole="button"
+              accessibilityLabel={ showConfirmPassword
+                ? t('register.hideConfirmPasswordLabel')
+                : t('register.showConfirmPasswordLabel')
+              }
+              style={{ width: 48, height: 48, justifyContent: 'center', alignItems: 'center' }}
               onPress={() => {
                 setShowConfirmPassword(!showConfirmPassword);
                 triggerHaptic();
@@ -154,6 +168,10 @@ export default function RegisterScreen() {
               thumbColor={acceptedTerms ? '#fff' : '#888'}
             />
             <TouchableOpacity
+              accessible
+              accessibilityRole="link"
+              accessibilityLabel={t('register.openTermsLabel')}
+              style={{ minHeight: 48, justifyContent: 'center' }}
               onPress={() => {
                 setTermsVisible(true);
                 triggerHaptic();
@@ -256,7 +274,8 @@ const styles = StyleSheet.create({
     width: '100%',
     backgroundColor: '#fff',
     borderRadius: 8,
-    padding: 12,
+    paddingHorizontal: 12,
+    height: 48,
     marginBottom: 15,
     fontFamily: 'Montserrat-Regular',
   },
@@ -268,10 +287,12 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 15,
+    height: 48, 
   },
   inputPassword: {
     flex: 1,
     paddingVertical: 12,
+    height: '100%',
     fontFamily: 'Montserrat-Regular',
   },
   termsRow: {
