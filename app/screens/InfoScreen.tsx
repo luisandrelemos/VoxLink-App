@@ -60,7 +60,11 @@ export default function InfoScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={()=>onPress(()=>router.push('/home'))}>
+        <TouchableOpacity
+          onPress={()=>onPress(()=>router.push('/home'))}
+          style={styles.backButton}
+          hitSlop={{ top:12, bottom:12, left:12, right:12 }}
+        >
           <ScaledText base={16} style={styles.backText}>
             ← {t('info.back')}
           </ScaledText>
@@ -201,6 +205,11 @@ const styles = StyleSheet.create({
 
   /* topo */
   header: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center', paddingHorizontal: 15 },
+  backButton: {
+    minWidth: 48,
+    minHeight: 48,
+    justifyContent: 'center',
+  },
   backText: { color: '#fff', fontFamily: 'Montserrat-SemiBold' },
   logo: { width: 110, height: 40, resizeMode: 'contain' },
 

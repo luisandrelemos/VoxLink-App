@@ -149,7 +149,11 @@ export default function SettingsScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={()=>{ router.push('/home'); haptic(); playClick(); }}>
+          <TouchableOpacity
+            onPress={()=>{ router.push('/home'); haptic(); playClick(); }}
+            style={styles.backButton}
+            hitSlop={{top:12,bottom:12,left:12,right:12}}
+          >
           <ScaledText base={16} style={styles.backText}>{t('settings.back')}</ScaledText>
         </TouchableOpacity>
         <Image source={require('../../assets/images/logo-header.png')} style={styles.logo}/>
@@ -160,7 +164,11 @@ export default function SettingsScreen() {
 
         {/* Idioma */}
         <ScaledText base={16} style={styles.label}>{t('settings.language')}</ScaledText>
-        <TouchableOpacity style={styles.dropdown} onPress={()=>{ setLangModalVisible(true); haptic(); playClick(); }}>
+          <TouchableOpacity
+            style={[styles.dropdown, styles.dropdownButton]}
+            onPress={()=>{ setLangModalVisible(true); haptic(); playClick(); }}
+            hitSlop={{top:12,bottom:12,left:12,right:12}}
+          >
           <Image source={selectedLang.flag} style={styles.flag}/>
           <ScaledText base={14} style={styles.dropdownText}>{selectedLang.label}</ScaledText>
         </TouchableOpacity>
@@ -194,8 +202,12 @@ export default function SettingsScreen() {
         {/* Tamanho do texto */}
         <ScaledText base={16} style={styles.label}>{t('settings.textSize')}</ScaledText>
         <View style={styles.sliderTrack}>
-          <ScaledText base={13} style={styles.sliderLabel}>aA</ScaledText>
+          <ScaledText base={13} style={styles.sliderLabel} accessible={false}>aa</ScaledText>
           <Slider
+            accessible
+            accessibilityRole="adjustable"
+            accessibilityLabel={t('settings.textSize')}
+            accessibilityHint={t('settings.textSize')}
             minimumValue={0}
             maximumValue={2}
             step={0.01}
@@ -207,12 +219,16 @@ export default function SettingsScreen() {
             thumbTintColor="#fff"
             style={{ flex: 1 }}
           />
-          <ScaledText base={18} style={styles.sliderLabel}>aA</ScaledText>
+          <ScaledText base={18} style={styles.sliderLabel} accessible={false}>aA</ScaledText>
         </View>
 
         {/* Voz TTS */}
         <ScaledText base={16} style={styles.label}>{t('settings.ttsVoice')}</ScaledText>
-        <TouchableOpacity style={styles.dropdown} onPress={()=>{ setVoiceModalVisible(true); haptic(); playClick(); }}>
+          <TouchableOpacity
+            style={[styles.dropdown, styles.dropdownButton]}
+            onPress={()=>{ setVoiceModalVisible(true); haptic(); playClick(); }}
+            hitSlop={{top:12,bottom:12,left:12,right:12}}
+          >
           <Image source={ttsVoices.find(v=>v.key===voice)?.icon} style={styles.voiceIcon}/>
           <ScaledText base={14} style={styles.dropdownText}>{t(`voices.${voice}`)}</ScaledText>
         </TouchableOpacity>
@@ -241,7 +257,11 @@ export default function SettingsScreen() {
 
         {/* Tipo de utilizador */}
         <ScaledText base={16} style={styles.label}>{t('settings.userType')}</ScaledText>
-        <TouchableOpacity style={styles.dropdown} onPress={()=>{ setUserTypeModalVisible(true); haptic(); playClick(); }}>
+        <TouchableOpacity
+          style={[styles.dropdown, styles.dropdownButton]}
+          onPress={()=>{ setUserTypeModalVisible(true); haptic(); playClick(); }}
+          hitSlop={{top:12,bottom:12,left:12,right:12}}
+        >
           <Image source={selectedUserType.icon} style={styles.optionIcon}/>
           <ScaledText base={14} style={styles.dropdownText}>{t(`users.${selectedUserType.key}`)}</ScaledText>
         </TouchableOpacity>
@@ -284,6 +304,10 @@ export default function SettingsScreen() {
               <ScaledText base={14} style={styles.switchDescription}>{t(descKey)}</ScaledText>
             </View>
             <Switch
+              accessible
+              accessibilityRole="switch"
+              accessibilityLabel={t(labelKey)}
+              accessibilityState={{ checked: value }}
               value={value}
               onValueChange={async val => {
                 setter(val);
@@ -312,6 +336,17 @@ const styles = StyleSheet.create({
 
   header:{ flexDirection:'row', justifyContent:'space-between',
            alignItems:'center', paddingHorizontal:15 },
+
+  backButton: {
+      minWidth: 48,
+      minHeight: 48,
+      justifyContent: 'center',
+    },
+    dropdownButton: {
+      minHeight: 48,
+      justifyContent: 'flex-start',
+    },
+
   backText:{ color:'#fff', fontFamily:'Montserrat-SemiBold', fontSize:16 },
   logo:{ width:110, height:40, resizeMode:'contain' },
 
@@ -341,7 +376,7 @@ const styles = StyleSheet.create({
   switchDescription:{ color:'#aaa', fontSize:14,
                       fontFamily:'Montserrat-Regular' },
 
-  footer:{ color:'#aaa', textAlign:'center', marginTop:40,
+  footer:{ color:'#aaa', textAlign:'center', marginTop:20,
            fontFamily:'Montserrat-SemiBold', fontSize:14 },
 
   modalOverlay:{ flex:1, backgroundColor:'#00000088',

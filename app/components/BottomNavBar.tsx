@@ -33,6 +33,14 @@ const icons = {
   info:     require('../../assets/images/nav-info.png'),
 } as const;
 
+// logo no topo do ficheiro
+const navLabels: Record<keyof typeof icons, string> = {
+  home:     'Página Inicial',
+  profile:  'Minha Conta',
+  settings: 'Definições',
+  info:     'Informações',
+};
+
 /* rotas válidas reconhecidas pela expo-router  */
 type AppRoute = '/home' | '/account' | '/settings' | '/info';
 
@@ -157,7 +165,14 @@ export default function BottomNavBar() {
         <NavBtn route="/account"  icon="profile" />
 
         {/* logótipo - assistente */}
-        <TouchableOpacity onPress={handleVoiceCommand} activeOpacity={voiceEnabled ? 0.7 : 1}>
+        <TouchableOpacity
+        accessible
+        accessibilityRole="button"
+        accessibilityLabel="Assistente de Voz"
+        onPress={handleVoiceCommand}
+        activeOpacity={voiceEnabled ? 0.7 : 1}
+        hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+      >
           <Image
             source={require('../../assets/images/logo.png')}
             style={[styles.navLogo, !voiceEnabled && { opacity: 0.35 }]}
@@ -174,7 +189,19 @@ export default function BottomNavBar() {
   function NavBtn({ route, icon }: { route: AppRoute; icon: keyof typeof icons }) {
     const active = isActive(route);
     return (
-      <TouchableOpacity onPress={() => { if (!active) { haptic(); playClick(); router.replace(route); } }}>
+      <TouchableOpacity
+      accessible
+      accessibilityRole="button"
+      accessibilityLabel={navLabels[icon]}
+      onPress={() => {
+        if (!active) {
+          haptic();
+          playClick();
+          router.replace(route);
+        }
+      }}
+      hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+    >
         <View style={styles.navItem}>
           <Image source={icons[icon]} style={[styles.navIcon, active && styles.active]} />
           {active && <View style={styles.navIndicator} />}
@@ -198,7 +225,8 @@ const styles = StyleSheet.create({
     justifyContent: 'space-around',
     alignItems: 'center',
   },
-  navItem:  { alignItems: 'center', justifyContent: 'center' },
+  navItem:  {
+   alignItems: 'center',    justifyContent: 'center',    minWidth: 48,    minHeight: 48,  },
   navIcon:  { width: 30, height: 30, tintColor: '#fff', resizeMode: 'contain' },
   navLogo:  { width: 55, height: 55, resizeMode: 'contain' },
   active:   { tintColor: '#fff' },

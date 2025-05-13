@@ -111,7 +111,11 @@ export default function ProfileScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={()=>onPress(()=>router.push('/home'))}>
+        <TouchableOpacity
+          onPress={()=>onPress(()=>router.push('/home'))}
+          style={styles.backButton}
+          hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+        >
           <ScaledText base={16} style={styles.backText}>
             ← {t('profile.back')}
           </ScaledText>
@@ -243,6 +247,11 @@ const styles = StyleSheet.create({
     justifyContent: 'space-between',
     alignItems: 'center',
     paddingHorizontal: 15,
+  },
+  backButton: {
+    minWidth: 48,
+    minHeight: 48,
+    justifyContent: 'center',
   },
   backText: {
     color: '#fff',
