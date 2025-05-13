@@ -137,7 +137,11 @@ export default function STTScreen() {
 
       {/* Header */}
       <View style={styles.header}>
-        <TouchableOpacity onPress={() => { triggerHaptic(); playClick(); router.back(); }}>
+      <TouchableOpacity
+        onPress={() => { triggerHaptic(); playClick(); router.back(); }}
+        style={styles.backButton}
+        hitSlop={{ top:12, bottom:12, left:12, right:12 }}
+      >
           <ScaledText base={16} style={styles.backText}>{t('stt.back')}</ScaledText>
         </TouchableOpacity>
         <Image source={require('../../assets/images/logo-header.png')} style={styles.logo} />
@@ -161,7 +165,8 @@ export default function STTScreen() {
           }
         />
         <TouchableOpacity
-          style={styles.copyIcon}
+          style={styles.copyButton}
+          hitSlop={{ top:12, bottom:12, left:12, right:12 }}
           onPress={async () => {
             if (!transcription.trim()) return;
             triggerHaptic(); playClick();
@@ -169,6 +174,9 @@ export default function STTScreen() {
             setCopied(true);
             setTimeout(() => setCopied(false), 2000);
           }}
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel={t('stt.copyButtonLabel')} // “Copiar texto”
         >
           <MaterialIcons name={copied ? 'check' : 'content-copy'} size={20} color="#000" />
         </TouchableOpacity>
@@ -177,15 +185,29 @@ export default function STTScreen() {
       {/* Seleção de idioma + microfone */}
       <View style={styles.bottomArea}>
         <TouchableOpacity
-          style={styles.dropdown}
+          style={[styles.dropdown, styles.dropdownButton]}
           onPress={() => { playClick(); triggerHaptic(); setModalVisible(true); }}
+          hitSlop={{ top:12, bottom:12, left:12, right:12 }}
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel={`${t('stt.languageButtonLabel')}, ${selectedLang.label}`}
+          accessibilityHint={t('stt.languageButtonHint')}
         >
           <Image source={selectedLang.flag} style={styles.dropdownIcon} />
-          <ScaledText base={14} style={styles.dropdownText}>{selectedLang.label}</ScaledText>
-          <MaterialIcons name="arrow-drop-down" size={24} color="#000" />
+          <ScaledText accessible={false} base={14} style={styles.dropdownText}>
+            {selectedLang.label}
+          </ScaledText>
+          <MaterialIcons accessible={false} name="arrow-drop-down" size={24} color="#000" />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.micButton} onPress={handleMicPress}>
+        <TouchableOpacity
+          style={styles.micButton}
+          onPress={handleMicPress}
+          accessible
+          accessibilityRole="button"
+          accessibilityLabel={t('stt.micButtonLabel')} // “Iniciar gravação de voz”
+          hitSlop={{ top:24, bottom:24, left:24, right:24 }}
+        >
           <Animated.View style={[styles.pulseCircle, { transform: [{ scale: pulseAnim }] }]}>
             {loading ? (
               <ActivityIndicator size="large" color="#fff" />
@@ -242,7 +264,7 @@ const styles = StyleSheet.create({
     backgroundColor: '#fff',
     borderRadius: 14,
     height: 250,
-    marginTop: 25,
+    marginTop: 15,
     marginHorizontal: 20,
     padding: 12
   },
@@ -262,7 +284,32 @@ const styles = StyleSheet.create({
   modalOptionText: { color: '#fff', fontFamily: 'Montserrat-Regular' },
   dropdownIcon: { width: 18, height: 18, resizeMode: 'contain' },
 
-  micButton: { alignSelf: 'center' },
+backButton: {
+    minWidth: 48,
+    minHeight: 48,
+    justifyContent: 'center',
+  },
+  copyButton: {
+    position: 'absolute',
+    bottom: 10,
+    left: 10,
+    minWidth: 48,
+    minHeight: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  dropdownButton: {
+    minHeight: 48,
+    justifyContent: 'center',
+  },
+  micButton: {
+    alignSelf: 'center',
+    minWidth: 180,
+    minHeight: 180,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+
   micIcon: { width: 180, height: 180, resizeMode: 'contain' },
   pulseCircle: {
     justifyContent: 'center',
