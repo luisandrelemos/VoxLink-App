@@ -1,3 +1,5 @@
+// app/screens/RegisterScreen.tsx
+
 import React, { useState } from 'react';
 import {
   View,
@@ -108,9 +110,10 @@ export default function RegisterScreen() {
             <TouchableOpacity
               accessible
               accessibilityRole="button"
-              accessibilityLabel={ showPassword
-                ? t('register.hidePasswordLabel')
-                : t('register.showPasswordLabel')
+              accessibilityLabel={
+                showPassword
+                  ? t('register.hidePasswordLabel')
+                  : t('register.showPasswordLabel')
               }
               style={{ width: 48, height: 48, justifyContent: 'center', alignItems: 'center' }}
               onPress={() => {
@@ -139,9 +142,10 @@ export default function RegisterScreen() {
             <TouchableOpacity
               accessible
               accessibilityRole="button"
-              accessibilityLabel={ showConfirmPassword
-                ? t('register.hideConfirmPasswordLabel')
-                : t('register.showConfirmPasswordLabel')
+              accessibilityLabel={
+                showConfirmPassword
+                  ? t('register.hideConfirmPasswordLabel')
+                  : t('register.showConfirmPasswordLabel')
               }
               style={{ width: 48, height: 48, justifyContent: 'center', alignItems: 'center' }}
               onPress={() => {
@@ -167,21 +171,24 @@ export default function RegisterScreen() {
               trackColor={{ false: '#555', true: '#ccc' }}
               thumbColor={acceptedTerms ? '#fff' : '#888'}
             />
+
+            <Text style={styles.termsText}>
+              {t('register.acceptTermsPrefix')}
+            </Text>
+
             <TouchableOpacity
               accessible
               accessibilityRole="link"
-              accessibilityLabel={t('register.openTermsLabel')}
-              style={{ minHeight: 48, justifyContent: 'center' }}
+              accessibilityLabel={t('register.termsLink')}
+              hitSlop={{ top: 12, bottom: 12, left: 12, right: 12 }}
+              style={styles.termsLinkContainer}
               onPress={() => {
                 setTermsVisible(true);
                 triggerHaptic();
               }}
             >
-              <Text style={styles.termsText}>
-                {t('register.acceptTermsPrefix')}{' '}
-                <Text style={styles.termsLink}>
-                  {t('register.termsLink')}
-                </Text>
+              <Text style={styles.termsLink}>
+                {t('register.termsLink')}
               </Text>
             </TouchableOpacity>
           </View>
@@ -287,7 +294,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     marginBottom: 15,
-    height: 48, 
+    height: 48,
   },
   inputPassword: {
     flex: 1,
@@ -299,17 +306,23 @@ const styles = StyleSheet.create({
     width: '100%',
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 10,
     marginVertical: 10,
   },
   termsText: {
     color: '#fff',
     fontFamily: 'Montserrat-Regular',
+    marginLeft: 8,
+  },
+  termsLinkContainer: {
+    minHeight: 48,
+    justifyContent: 'center',
+    marginLeft: 4,
   },
   termsLink: {
     color: '#fff',
     fontFamily: 'Montserrat-Bold',
     textDecorationLine: 'underline',
+    fontSize: 16,
   },
   registerButton: {
     width: '100%',
@@ -371,9 +384,5 @@ const styles = StyleSheet.create({
     fontFamily: 'Montserrat-Regular',
     lineHeight: 26,
     textAlign: 'justify',
-  },
-  modalSubTitle: {
-    color: '#fff',
-    fontFamily: 'Montserrat-SemiBold',
   },
 });
