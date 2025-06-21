@@ -4,7 +4,7 @@ import { initializeAuth, getReactNativePersistence } from 'firebase/auth/react-n
 import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const firebaseConfig = {
-  apiKey: "***REMOVED***",
+  apiKey: "Paste API Here",
   authDomain: "voxlink-8ce17.firebaseapp.com",
   projectId: "voxlink-8ce17",
   storageBucket: "voxlink-8ce17.firebasestorage.app",
