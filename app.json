@@ -44,7 +44,7 @@
     },
 
     "extra": {
-      "googleTtsKey": "***Paste API Here***",
+      "googleTtsKey": "Paste API Here",
       "router": {
         "origin": false
       },
